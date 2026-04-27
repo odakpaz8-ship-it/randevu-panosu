@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Randevu Planlama Panosu</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; min-height: 100vh; }
+
+.toolbar {
+  background: #1a3a5c; color: #fff;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; flex-wrap: wrap;
+}
+.toolbar h1 { font-size: 17px; font-weight: 600; letter-spacing: 1px; flex: 1; }
+.toolbar label { font-size: 13px; opacity: 0.8; }
+.toolbar input[type=date] {
+  font-size: 13px; padding: 5px 10px; border-radius: 6px; border: none;
+  background: rgba(255,255,255,0.15); color: #fff; cursor: pointer;
+}
+.toolbar input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1); }
+.total-badge { background: rgba(255,255,255,0.18); padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+.tbtn { border: none; padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; color: #fff; }
+.tbtn:hover { opacity: 0.8; }
+.tbtn.red { background: rgba(200,40,40,0.8); }
+.tbtn.gray { background: rgba(255,255,255,0.2); }
+
+.pano-wrap { overflow-x: auto; max-height: calc(100vh - 52px); overflow-y: auto; }
+.pano-table { border-collapse: collapse; min-width: 900px; width: 100%; background: #fff; }
+.pano-table th, .pano-table td { border: 1px solid #bbb; text-align: center; vertical-align: middle; }
+.pano-table thead th { position: sticky; top: 0; z-index: 10; }
+
+.header-advisor {
+  background: #cce0f5; padding: 6px 4px; min-width: 100px;
+  font-size: 11px; font-weight: 600; color: #1a3a5c;
+  cursor: pointer; transition: background 0.15s; user-select: none;
+}
+.header-advisor:hover { background: #afd0ef; }
+.header-advisor .click-hint { font-size: 9px; color: #5a8cbf; margin-top: 2px; font-weight: 400; }
+.header-walkin { background: #e0e0e0; padding: 6px 4px; min-width: 100px; font-size: 11px; font-weight: 600; color: #333; }
+
+.avatar-circle {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: #5a8cbf; color: #fff; font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 3px; border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.avatar-circle.walkin { background: #888; }
+.count-badge { background: #cc0000; color: #fff; font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 4px; display: inline-block; min-width: 24px; }
+
+.time-col { background: #ddeeff; font-size: 12px; color: #1a3a5c; padding: 2px 8px; white-space: nowrap; width: 62px; min-width: 62px; }
+.time-col.hour { font-size: 14px; font-weight: 700; background: #b8d4ef; }
+
+.cell {
+  width: 100px; min-width: 100px; height: 26px;
+  cursor: pointer; background: #d8d8d8;
+  font-size: 11px; font-weight: 600; color: #fff;
+  transition: opacity 0.15s, transform 0.1s; padding: 1px 2px;
+}
+.cell:hover { opacity: 0.82; transform: scale(1.04); z-index: 2; position: relative; }
+.cell.hour-row { border-top: 2px solid #999; }
+.cell.walkin-cell { background: #c8c8c8; }
+.cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; line-height: 1.1; }
+.cell-code { font-size: 11px; font-weight: 700; }
+.cell-plaka { font-size: 9px; font-weight: 400; opacity: 0.95; }
+
+.legend-wrap { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px; background: #fff; border-top: 2px solid #ddd; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #333; padding: 4px 10px; border-radius: 5px; border: 1px solid #ddd; background: #fafafa; }
+.legend-dot { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; }
+
+/* === ADVISOR PANEL MODAL === */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: #fff; border-radius: 14px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  padding: 0; min-width: 320px; max-width: 420px; width: 94%;
+  max-height: 92vh; overflow-y: auto;
+}
+.modal-header {
+  background: #1a3a5c; color: #fff;
+  padding: 16px 20px; border-radius: 14px 14px 0 0;
+  display: flex; align-items: center; gap: 12px;
+}
+.modal-header .av { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.modal-header h3 { font-size: 15px; font-weight: 600; }
+.modal-header .sub { font-size: 12px; opacity: 0.75; }
+.modal-close { margin-left: auto; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; line-height: 1; padding: 0 4px; }
+
+.modal-body { padding: 16px 20px; }
+
+.section-title {
+  font-size: 11px; font-weight: 700; color: #888;
+  text-transform: uppercase; letter-spacing: 1px;
+  margin: 16px 0 8px; padding-bottom: 4px;
+  border-bottom: 1px solid #eee;
+}
+.section-title:first-child { margin-top: 0; }
+
+/* Toplu işlem kartları */
+.bulk-card {
+  border: 1.5px solid #ddd; border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 8px;
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; gap: 12px;
+}
+.bulk-card:hover { border-color: #5a8cbf; background: #f0f7ff; }
+.bulk-card.active { border-color: #27ae60; background: #f0fff4; }
+.bulk-card.danger:hover { border-color: #e74c3c; background: #fff5f5; }
+.bulk-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.bulk-info { flex: 1; }
+.bulk-info strong { font-size: 13px; font-weight: 600; color: #1a3a5c; display: block; }
+.bulk-info span { font-size: 11px; color: #888; }
+.bulk-check { font-size: 18px; color: #27ae60; }
+
+/* Yemek saat seçici */
+.yemek-expand { display: none; margin-top: 8px; padding: 12px; background: #fffbf0; border-radius: 8px; border: 1px solid #f39c12; }
+.yemek-expand.open { display: block; }
+.time-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.time-row label { font-size: 12px; color: #555; width: 50px; flex-shrink: 0; }
+.time-select { flex: 1; padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px; }
+.yemek-apply-btn {
+  width: 100%; padding: 9px; border-radius: 7px; border: none;
+  background: #f39c12; color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.yemek-apply-btn:hover { opacity: 0.85; }
+
+/* İzin saat aralığı */
+.izin-range-expand { display: none; margin-top: 8px; padding: 12px; background: #fff5f5; border-radius: 8px; border: 1px solid #e74c3c; }
+.izin-range-expand.open { display: block; }
+.izin-apply-btn {
+  width: 100%; padding: 9px; border-radius: 7px; border: none;
+  background: #e74c3c; color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.izin-apply-btn:hover { opacity: 0.85; }
+
+/* Temizle butonu */
+.clear-adv-btn {
+  width: 100%; padding: 9px; border-radius: 7px; border: 1.5px solid #ccc;
+  background: #f5f5f5; color: #555; font-size: 13px; font-weight: 600;
+  cursor: pointer; margin-top: 4px;
+}
+.clear-adv-btn:hover { background: #ffe5e5; border-color: #e74c3c; color: #c0392b; }
+
+/* === HÜCRE MODAL === */
+.cell-modal {
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+  padding: 20px; min-width: 300px; max-width: 360px; width: 92%;
+  max-height: 92vh; overflow-y: auto;
+}
+.cell-modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #1a3a5c; }
+.modal-info { font-size: 13px; color: #666; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+
+.plaka-section { margin-bottom: 12px; background: #f0f7ff; border-radius: 8px; padding: 10px 12px; border: 1px solid #b8d4ef; }
+.plaka-section label { font-size: 12px; font-weight: 700; color: #1a3a5c; display: block; margin-bottom: 6px; }
+.plaka-input {
+  width: 100%; padding: 8px 12px; border-radius: 7px;
+  border: 1.5px solid #5a8cbf; font-size: 15px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px; color: #1a3a5c; outline: none; background: #fff;
+}
+.plaka-input:focus { border-color: #1a3a5c; box-shadow: 0 0 0 3px rgba(26,58,92,0.1); }
+.plaka-hint { font-size: 11px; color: #888; margin-top: 4px; }
+
+.status-options { display: flex; flex-direction: column; gap: 6px; }
+.status-btn { padding: 9px 14px; border-radius: 7px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; text-align: left; color: #fff; transition: opacity 0.15s, transform 0.1s; }
+.status-btn:hover { opacity: 0.88; transform: translateX(3px); }
+.modal-cancel { margin-top: 10px; width: 100%; padding: 9px; border-radius: 7px; border: 1px solid #ccc; background: #f5f5f5; cursor: pointer; font-size: 13px; color: #555; }
+.modal-cancel:hover { background: #e8e8e8; }
+.back-btn { margin-top: 6px; width: 100%; padding: 8px; border-radius: 7px; border: 1px solid #5a8cbf; background: #f0f7ff; cursor: pointer; font-size: 13px; color: #1a3a5c; }
+
+@media print {
+  .tbtn { display: none; }
+  .modal-overlay { display: none !important; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h1>📋 RANDEVU PLANLAMA PANOSU</h1>
+  <label>Tarih:</label>
+  <input type="date" id="dateInput" onchange="onDateChange()">
+  <span class="total-badge" id="totalBadge">Toplam: 0</span>
+  <button class="tbtn gray" onclick="window.print()">🖨️ Yazdır</button>
+  <button class="tbtn red" onclick="clearAll()">🗑️ Temizle</button>
+</div>
+
+<div class="pano-wrap">
+  <table class="pano-table">
+    <thead id="tableHead"></thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<div class="legend-wrap" id="legend"></div>
+
+<!-- ADVISOR PANEL MODAL -->
+<div class="modal-overlay" id="advisorOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="av" id="apAvatar"></div>
+      <div>
+        <h3 id="apName"></h3>
+        <div class="sub" id="apDate"></div>
+      </div>
+      <button class="modal-close" onclick="closeAdvisorPanel()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="section-title">Toplu İşlemler</div>
+
+      <!-- Tüm Gün İzin -->
+      <div class="bulk-card" id="allDayIzinCard" onclick="toggleAllDayIzin()">
+        <div class="bulk-icon" style="background:#fde8e8;">🏖️</div>
+        <div class="bulk-info">
+          <strong>Tüm Gün İzinli</strong>
+          <span>Tüm saatleri izinli olarak işaretle</span>
+        </div>
+        <div class="bulk-check" id="allDayCheck" style="display:none;">✓</div>
+      </div>
+
+      <!-- İzin Saat Aralığı -->
+      <div class="bulk-card" id="izinRangeCard" onclick="toggleIzinRangeExpand()">
+        <div class="bulk-icon" style="background:#fde8e8;">⏰</div>
+        <div class="bulk-info">
+          <strong>Belirli Saatte İzin</strong>
+          <span>Seçilen saat aralığını izinli yap</span>
+        </div>
+        <div style="font-size:12px;color:#e74c3c;font-weight:600;">▼</div>
+      </div>
+      <div class="izin-range-expand" id="izinRangeExpand">
+        <div class="time-row">
+          <label>Başlangıç</label>
+          <select class="time-select" id="izinStart"></select>
+        </div>
+        <div class="time-row">
+          <label>Bitiş</label>
+          <select class="time-select" id="izinEnd"></select>
+        </div>
+        <button class="izin-apply-btn" onclick="applyIzinRange()">✓ İzin Uygula</button>
+      </div>
+
+      <!-- Yemek Paydosu -->
+      <div class="bulk-card" id="yemekCard" onclick="toggleYemekExpand()">
+        <div class="bulk-icon" style="background:#fef9e7;">🍽️</div>
+        <div class="bulk-info">
+          <strong>Yemek Paydosu</strong>
+          <span>Öğle molası saatlerini belirle</span>
+        </div>
+        <div style="font-size:12px;color:#f39c12;font-weight:600;">▼</div>
+      </div>
+      <div class="yemek-expand" id="yemekExpand">
+        <div class="time-row">
+          <label>Başlangıç</label>
+          <select class="time-select" id="yemekStart"></select>
+        </div>
+        <div class="time-row">
+          <label>Bitiş</label>
+          <select class="time-select" id="yemekEnd"></select>
+        </div>
+        <button class="yemek-apply-btn" onclick="applyYemek()">✓ Yemek Paydosu Uygula</button>
+      </div>
+
+      <div class="section-title" style="margin-top:20px;">Temizle</div>
+      <button class="clear-adv-btn" onclick="clearAdvisorDay()">🗑️ Bu Danışmanın Bugünkü Tüm Kayıtlarını Sil</button>
+    </div>
+  </div>
+</div>
+
+<!-- CELL MODAL -->
+<div class="modal-overlay" id="cellOverlay">
+  <div class="cell-modal">
+    <h3>Durum Seç</h3>
+    <div class="modal-info" id="cellModalInfo"></div>
+    <div id="plakaSection" class="plaka-section" style="display:none;">
+      <label>🚗 Müşteri Plakası</label>
+      <input type="text" class="plaka-input" id="plakaInput" placeholder="34 ABC 123" maxlength="12">
+      <div class="plaka-hint">İsteğe bağlı — boş bırakabilirsiniz</div>
+    </div>
+    <div class="status-options" id="statusOptions"></div>
+    <button class="modal-cancel" onclick="closeCellModal()">✕ İptal</button>
+  </div>
+</div>
+
+<script>
+const STATUSES = [
+  { code:'M',  label:'Müşteriyle Görüşme Devam',                 color:'#27ae60', plaka:true  },
+  { code:'T',  label:'Teslimat Yapıyor',                          color:'#2980b9', plaka:false },
+  { code:'Y',  label:'Yemek Paydosunda Afiyet Olsun',            color:'#f39c12', plaka:false },
+  { code:'!',  label:'İzinli',                                    color:'#e74c3c', plaka:false },
+  { code:'A',  label:'Anket Araması Yapıyor',                     color:'#8e44ad', plaka:false },
+  { code:'R',  label:'Randevu GELDİ Bekliyor',                   color:'#16a085', plaka:true  },
+  { code:'D',  label:'Müşteriyle DRP8 için 30 Dakika Planlandı',  color:'#d35400', plaka:false },
+  { code:'!!', label:'Randevusuna Geçgeç',                       color:'#c0392b', plaka:false },
+];
+
+const IZIN_STATUS  = { code:'!',  label:'İzinli',                       color:'#e74c3c', plaka:'' };
+const YEMEK_STATUS = { code:'Y',  label:'Yemek Paydosunda Afiyet Olsun', color:'#f39c12', plaka:'' };
+
+const ADVISORS = [
+  'Berk ÇALAP','Erdem ALBAYRAK','Erkut DİKEÇ','Furkan ÜNLÜ',
+  'Gonca SARI','Mustafa ÜNLÜ','Tarık TUNÇ','Ramazan ALAGEYİK',
+  'Nisanur SOY','Yalçın SEDEFOĞLU','Yunuscan YÜCE'
+];
+
+const TIMES = [];
+for(let h=8;h<=18;h++){
+  for(let m=0;m<60;m+=10){
+    if(h===8&&m<30)continue;
+    if(h===18&&m>0)break;
+    TIMES.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+  }
+}
+
+let allData={}, currentDate='', cells={};
+let currentAdvisorIdx=null, selectedCell=null;
+
+function getInitials(n){ return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+function todayStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function formatDateTR(str){
+  if(!str)return'';
+  const [y,m,d]=str.split('-');
+  return `${d}.${m}.${y}`;
+}
+
+/* ---- Storage ---- */
+function loadStorage(){ try{ const s=localStorage.getItem('randevuAllData3'); if(s)allData=JSON.parse(s); }catch(e){} }
+function saveStorage(){ try{ localStorage.setItem('randevuAllData3',JSON.stringify(allData)); }catch(e){} }
+function saveDay(){ allData[currentDate]=JSON.parse(JSON.stringify(cells)); saveStorage(); }
+function loadDay(date){ cells=allData[date]?JSON.parse(JSON.stringify(allData[date])):{} ; }
+
+function initDate(){
+  currentDate=todayStr();
+  document.getElementById('dateInput').value=currentDate;
+  loadStorage();
+  loadDay(currentDate);
+}
+function onDateChange(){
+  const nd=document.getElementById('dateInput').value;
+  if(!nd)return;
+  saveDay();
+  currentDate=nd;
+  loadDay(currentDate);
+  renderCells();
+}
+
+/* ---- Render ---- */
+function renderCells(){
+  document.querySelectorAll('.cell').forEach(el=>{ el.style.background=''; el.style.color=''; el.innerHTML=''; });
+  Object.entries(cells).forEach(([key,status])=>applyCellStyle(key,status));
+  updateCounts();
+}
+function applyCellStyle(key,status){
+  const [ai,t]=key.split('||');
+  const el=document.getElementById(`c||${ai}||${t}`);
+  if(!el)return;
+  el.style.background=status.color; el.style.color='#fff';
+  const pt=status.plaka?`<div class="cell-plaka">${status.plaka}</div>`:'';
+  el.innerHTML=`<div class="cell-inner"><div class="cell-code">${status.code}</div>${pt}</div>`;
+}
+
+/* ---- Build Table ---- */
+function buildTable(){
+  const head=document.getElementById('tableHead');
+  const body=document.getElementById('tableBody');
+
+  const tr=document.createElement('tr');
+  const th0=document.createElement('th');
+  th0.style.cssText='background:#1a3a5c;color:#fff;font-size:11px;padding:8px 4px;width:62px;';
+  th0.textContent='Saat'; tr.appendChild(th0);
+
+  ADVISORS.forEach((name,ai)=>{
+    const th=document.createElement('th');
+    th.className='header-advisor';
+    th.title='Toplu işlemler için tıkla';
+    th.innerHTML=`<div class="avatar-circle">${getInitials(name)}</div>
+      <div style="font-size:10px;margin-bottom:2px;">${name}</div>
+      <div class="count-badge" id="count-${ai}">0</div>
+      <div class="click-hint">⚙ Toplu işlem</div>`;
+    th.addEventListener('click',()=>openAdvisorPanel(ai));
+    tr.appendChild(th);
+  });
+
+  const thW=document.createElement('th');
+  thW.className='header-walkin';
+  thW.innerHTML=`<div class="avatar-circle walkin">?</div>
+    <div style="font-size:10px;margin-bottom:3px;">Randevusuz Gelen</div>
+    <div class="count-badge" id="count-walkin">0</div>`;
+  tr.appendChild(thW);
+  head.appendChild(tr);
+
+  TIMES.forEach(t=>{
+    const isHour=t.endsWith(':00');
+    const row=document.createElement('tr');
+    const tdT=document.createElement('td');
+    tdT.className='time-col'+(isHour?' hour':'');
+    tdT.textContent=t; row.appendChild(tdT);
+
+    ADVISORS.forEach((_,ai)=>{
+      const td=document.createElement('td');
+      td.className='cell'+(isHour?' hour-row':'');
+      td.id=`c||${ai}||${t}`;
+      td.addEventListener('click',()=>openCellModal(ai,t));
+      row.appendChild(td);
+    });
+
+    const tdW=document.createElement('td');
+    tdW.className='cell walkin-cell'+(isHour?' hour-row':'');
+    tdW.id=`c||walkin||${t}`;
+    tdW.addEventListener('click',()=>openCellModal('walkin',t));
+    row.appendChild(tdW);
+    body.appendChild(row);
+  });
+}
+
+/* ---- Advisor Panel ---- */
+function openAdvisorPanel(ai){
+  currentAdvisorIdx=ai;
+  document.getElementById('apAvatar').textContent=getInitials(ADVISORS[ai]);
+  document.getElementById('apName').textContent=ADVISORS[ai];
+  document.getElementById('apDate').textContent=formatDateTR(currentDate);
+
+  // Tüm gün izin durumu
+  refreshAllDayCheck();
+
+  // Expandları kapat
+  document.getElementById('yemekExpand').classList.remove('open');
+  document.getElementById('izinRangeExpand').classList.remove('open');
+
+  // Saat seçicileri doldur
+  fillTimeSelects();
+
+  document.getElementById('advisorOverlay').classList.add('open');
+}
+function closeAdvisorPanel(){ document.getElementById('advisorOverlay').classList.remove('open'); currentAdvisorIdx=null; }
+
+function refreshAllDayCheck(){
+  const isIzinli=isAllDayIzin(currentAdvisorIdx);
+  const card=document.getElementById('allDayIzinCard');
+  const chk=document.getElementById('allDayCheck');
+  card.className='bulk-card'+(isIzinli?' active':'');
+  chk.style.display=isIzinli?'block':'none';
+}
+
+function isAllDayIzin(ai){
+  return TIMES.every(t=>{ const c=cells[`${ai}||${t}`]; return c&&c.code==='!'; });
+}
+
+function toggleAllDayIzin(){
+  const ai=currentAdvisorIdx;
+  if(isAllDayIzin(ai)){
+    TIMES.forEach(t=>{ const key=`${ai}||${t}`; if(cells[key]&&cells[key].code==='!')delete cells[key]; });
+  } else {
+    TIMES.forEach(t=>{ cells[`${ai}||${t}`]={...IZIN_STATUS}; });
+  }
+  saveDay(); renderCells(); refreshAllDayCheck();
+}
+
+function toggleIzinRangeExpand(){
+  const el=document.getElementById('izinRangeExpand');
+  el.classList.toggle('open');
+  document.getElementById('yemekExpand').classList.remove('open');
+}
+function toggleYemekExpand(){
+  const el=document.getElementById('yemekExpand');
+  el.classList.toggle('open');
+  document.getElementById('izinRangeExpand').classList.remove('open');
+}
+
+function fillTimeSelects(){
+  const selects=['yemekStart','yemekEnd','izinStart','izinEnd'];
+  selects.forEach(id=>{
+    const sel=document.getElementById(id);
+    sel.innerHTML='';
+    TIMES.forEach(t=>{ const opt=document.createElement('option'); opt.value=t; opt.textContent=t; sel.appendChild(opt); });
+  });
+  // Yemek default: 12:30 - 13:30
+  setSelectVal('yemekStart','12:30');
+  setSelectVal('yemekEnd','13:30');
+  // İzin default: 09:00 - 12:00
+  setSelectVal('izinStart','09:00');
+  setSelectVal('izinEnd','12:00');
+}
+function setSelectVal(id,val){
+  const sel=document.getElementById(id);
+  for(let i=0;i<sel.options.length;i++){ if(sel.options[i].value===val){ sel.selectedIndex=i; return; } }
+}
+
+function applyYemek(){
+  const ai=currentAdvisorIdx;
+  const start=document.getElementById('yemekStart').value;
+  const end=document.getElementById('yemekEnd').value;
+  applyRangeStatus(ai,start,end,YEMEK_STATUS);
+  document.getElementById('yemekExpand').classList.remove('open');
+  saveDay(); renderCells(); refreshAllDayCheck();
+}
+function applyIzinRange(){
+  const ai=currentAdvisorIdx;
+  const start=document.getElementById('izinStart').value;
+  const end=document.getElementById('izinEnd').value;
+  applyRangeStatus(ai,start,end,IZIN_STATUS);
+  document.getElementById('izinRangeExpand').classList.remove('open');
+  saveDay(); renderCells(); refreshAllDayCheck();
+}
+
+function applyRangeStatus(ai,start,end,status){
+  let inRange=false;
+  TIMES.forEach(t=>{
+    if(t===start)inRange=true;
+    if(inRange) cells[`${ai}||${t}`]={...status};
+    if(t===end)inRange=false;
+  });
+}
+
+function clearAdvisorDay(){
+  if(!confirm(`${ADVISORS[currentAdvisorIdx]} için bugünkü tüm kayıtlar silinsin mi?`))return;
+  const ai=currentAdvisorIdx;
+  TIMES.forEach(t=>delete cells[`${ai}||${t}`]);
+  saveDay(); renderCells(); refreshAllDayCheck();
+}
+
+/* ---- Cell Modal ---- */
+function openCellModal(advisorIdx,time){
+  selectedCell={advisorIdx,time};
+  const name=advisorIdx==='walkin'?'Randevusuz Gelen':ADVISORS[advisorIdx];
+  document.getElementById('cellModalInfo').innerHTML=`<b>${name}</b> &mdash; <b>${time}</b>`;
+  document.getElementById('plakaSection').style.display='none';
+  const key=`${advisorIdx}||${time}`;
+  document.getElementById('plakaInput').value=cells[key]&&cells[key].plaka?cells[key].plaka:'';
+  buildCellStatusList(advisorIdx,time);
+  document.getElementById('cellOverlay').classList.add('open');
+}
+function closeCellModal(){ document.getElementById('cellOverlay').classList.remove('open'); selectedCell=null; }
+
+function buildCellStatusList(advisorIdx,time){
+  const key=`${advisorIdx}||${time}`;
+  const existing=cells[key];
+  const opts=document.getElementById('statusOptions');
+  opts.innerHTML='';
+
+  if(existing){
+    const clr=document.createElement('button');
+    clr.className='status-btn'; clr.style.background='#555'; clr.textContent='✕ Temizle';
+    clr.onclick=()=>{ clearCell(key,advisorIdx); closeCellModal(); };
+    opts.appendChild(clr);
+  }
+
+  STATUSES.forEach(s=>{
+    const btn=document.createElement('button');
+    btn.className='status-btn'; btn.style.background=s.color;
+    btn.textContent=`${s.code} — ${s.label}${s.plaka?' 🚗':''}`;
+    btn.onclick=()=>{
+      if(s.plaka){ showPlakaInput(s,key,advisorIdx,time); }
+      else { setCell(key,{...s,plaka:''},advisorIdx); closeCellModal(); }
+    };
+    opts.appendChild(btn);
+  });
+}
+
+function showPlakaInput(s,key,advisorIdx,time){
+  const opts=document.getElementById('statusOptions');
+  opts.innerHTML='';
+  document.getElementById('plakaSection').style.display='block';
+  document.getElementById('plakaInput').focus();
+
+  const saveBtn=document.createElement('button');
+  saveBtn.className='status-btn'; saveBtn.style.background=s.color;
+  saveBtn.textContent=`✓ Kaydet — ${s.code} ${s.label}`;
+  saveBtn.onclick=()=>{
+    const plaka=document.getElementById('plakaInput').value.toUpperCase().trim();
+    setCell(key,{...s,plaka},advisorIdx); closeCellModal();
+  };
+  opts.appendChild(saveBtn);
+
+  const backBtn=document.createElement('button');
+  backBtn.className='back-btn'; backBtn.textContent='← Geri';
+  backBtn.onclick=()=>{ document.getElementById('plakaSection').style.display='none'; buildCellStatusList(advisorIdx,time); };
+  opts.appendChild(backBtn);
+}
+
+function setCell(key,status,advisorIdx){
+  cells[key]=status; applyCellStyle(key,status); updateCounts(); saveDay();
+}
+function clearCell(key){
+  delete cells[key];
+  const [ai,t]=key.split('||');
+  const el=document.getElementById(`c||${ai}||${t}`);
+  if(el){el.style.background='';el.style.color='';el.innerHTML='';}
+  updateCounts(); saveDay();
+}
+function clearAll(){
+  if(!confirm('Bu güne ait tüm kayıtları silmek istediğinizden emin misiniz?'))return;
+  cells={};
+  document.querySelectorAll('.cell').forEach(el=>{ el.style.background=''; el.style.color=''; el.innerHTML=''; });
+  updateCounts(); saveDay();
+}
+
+function updateCounts(){
+  ADVISORS.forEach((_,ai)=>{
+    const cnt=Object.keys(cells).filter(k=>k.startsWith(`${ai}||`)).length;
+    const el=document.getElementById(`count-${ai}`); if(el)el.textContent=cnt;
+  });
+  const wCnt=Object.keys(cells).filter(k=>k.startsWith('walkin||')).length;
+  const wEl=document.getElementById('count-walkin'); if(wEl)wEl.textContent=wCnt;
+  document.getElementById('totalBadge').textContent=`Toplam: ${Object.keys(cells).length}`;
+}
+
+function buildLegend(){
+  const lg=document.getElementById('legend');
+  lg.innerHTML='<strong style="font-size:12px;color:#555;align-self:center;white-space:nowrap;">Kodlar:</strong>';
+  STATUSES.forEach(s=>{
+    const div=document.createElement('div'); div.className='legend-item';
+    div.innerHTML=`<div class="legend-dot" style="background:${s.color};"></div><span><b>${s.code}</b> — ${s.label}${s.plaka?' 🚗':''}</span>`;
+    lg.appendChild(div);
+  });
+}
+
+// Close on overlay click
+document.getElementById('advisorOverlay').addEventListener('click',function(e){ if(e.target===this)closeAdvisorPanel(); });
+document.getElementById('cellOverlay').addEventListener('click',function(e){ if(e.target===this)closeCellModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeAdvisorPanel(); closeCellModal(); } });
+document.getElementById('plakaInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ const b=document.querySelector('#statusOptions .status-btn'); if(b)b.click(); }
+});
+
+buildTable();
+buildLegend();
+initDate();
+renderCells();
+</script>
+</body>
+</html>
