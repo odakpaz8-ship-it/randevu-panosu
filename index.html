@@ -176,7 +176,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
   <label>Tarih:</label>
   <input type="date" id="dateInput" onchange="onDateChange()">
   <span class="total-badge" id="totalBadge">Randevu: 0</span>
-  <span id="syncStatus" style="font-size:11px;display:flex;align-items:center;">
+  <span id="syncStatus" style="font-size:11px;display:flex;align-items:center;display:none;">
     <span class="sync-dot wait" id="syncDot"></span>
     <span id="syncText">Çevrimdışı</span>
   </span>
@@ -290,28 +290,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
         </div>
       </div>
       <div class="stab-content" id="tab-sync">
-        <div id="syncStatusBox" class="sync-status-box none">Senkronizasyon kurulmadı.</div>
-        <div class="sync-form">
-          <label>Worker URL</label>
-          <input type="text" id="workerUrl" placeholder="https://randevu.KULLANICI.workers.dev">
-          <button class="sync-save-btn" onclick="saveWorkerUrl()">💾 Kaydet ve Bağlan</button>
-        </div>
-        <div style="margin-top:14px;">
-          <div class="steps">
-            <b>Nasıl kurulur? (5 dakika, ücretsiz)</b><br>
-            1. <a href="https://dash.cloudflare.com/sign-up" target="_blank">dash.cloudflare.com/sign-up</a> → Ücretsiz hesap aç<br>
-            2. Sol menüden <b>Workers & Pages</b> → <b>Create</b> → <b>Create Worker</b><br>
-            3. Bir isim ver (örn: <b>randevu</b>) → <b>Deploy</b><br>
-            4. <b>Edit Code</b>'a tıkla, kodu tamamen sil ve aşağıdaki kodu yapıştır → <b>Deploy</b><br>
-          </div>
-          <div class="step-box" id="workerCodeBox">⏳ Yükleniyor...</div>
-          <div class="steps">
-            5. Workers sayfasına geri dön → <b>Settings</b> → <b>Bindings</b> → <b>Add Binding</b><br>
-            &nbsp;&nbsp;&nbsp;→ <b>KV Namespace</b> seç → Variable: <b>RANDEVU_KV</b><br>
-            &nbsp;&nbsp;&nbsp;→ <b>KV Namespace</b> açılır menüsünde <b>Create new namespace</b> → isim: <b>randevu</b> → Kaydet<br>
-            6. Worker URL'yi kopyalayıp yukarıya yapıştır (örn: https://randevu.ad.workers.dev)<br>
-            7. <b>Kaydet ve Bağlan</b> butonuna bas ✅
-          </div>
+        <div id="syncStatusBox" class="sync-status-box ok">
+          ✅ Senkronizasyon aktif!<br>
+          <span style="font-size:11px;color:#555;">Sunucu: <b>https://randevu.odakpaz8.workers.dev</b></span><br>
+          <span style="font-size:11px;color:#555;">Her cihazda otomatik bağlanır, ayar gerekmez.</span>
         </div>
       </div>
     </div>
@@ -354,52 +336,17 @@ for(let h=8;h<=18;h++){
   }
 }
 
-let advisors = JSON.parse(localStorage.getItem('advisors2')||'null') || [
-  'Berk ÇALAP','Erdem ALBAYRAK','Erkut DİKEÇ','Furkan ÜNLÜ',
-  'Gonca SARI','Mustafa ÜNLÜ','Tarık TUNÇ','Ramazan ALAGEYİK',
-  'Nisanur SOY','Yalçın SEDEFOĞLU','Yunuscan YÜCE'
-];
-let advisorPhotos = JSON.parse(localStorage.getItem('advisorPhotos')||'{}');
+let advisors;
+try { advisors = JSON.parse(localStorage.getItem('advisors2')) || null; } catch(e) { advisors = null; }
+advisors = advisors || ['Berk ÇALAP','Erdem ALBAYRAK','Erkut DİKEÇ','Furkan ÜNLÜ','Gonca SARI','Mustafa ÜNLÜ','Tarık TUNÇ','Ramazan ALAGEYİK','Nisanur SOY','Yalçın SEDEFOĞLU','Yunuscan YÜCE'];
+let advisorPhotos;
+try { advisorPhotos = JSON.parse(localStorage.getItem('advisorPhotos')) || {}; } catch(e) { advisorPhotos = {}; }
 let allData={}, currentDate='', cells={};
 let currentAdvisorIdx=null, editingAdvisorIdx=null, photoTargetIdx=null;
-let workerUrl = localStorage.getItem('workerUrl')||'';
+let workerUrl = 'https://randevu.odakpaz8.workers.dev'; // Tüm cihazlarda otomatik bağlanır
 let syncTimer = null;
 let lastSyncedHash = '';
 
-// ===== WORKER CODE =====
-const WORKER_CODE = `export default {
-  async fetch(request, env) {
-    const h = {'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type'};
-    if(request.method==='OPTIONS') return new Response(null,{headers:h});
-    const url=new URL(request.url), p=url.pathname;
-    try {
-      if(request.method==='GET'&&p==='/data'){
-        const date=url.searchParams.get('date');
-        const val=await env.RANDEVU_KV.get('cells_'+date);
-        return new Response(JSON.stringify({cells:val?JSON.parse(val):{}}),{headers:{...h,'Content-Type':'application/json'}});
-      }
-      if(request.method==='GET'&&p==='/meta'){
-        const a=await env.RANDEVU_KV.get('advisors');
-        const ph=await env.RANDEVU_KV.get('photos');
-        return new Response(JSON.stringify({advisors:a?JSON.parse(a):null,photos:ph?JSON.parse(ph):{}}),{headers:{...h,'Content-Type':'application/json'}});
-      }
-      if(request.method==='POST'&&p==='/data'){
-        const b=await request.json();
-        await env.RANDEVU_KV.put('cells_'+b.date,JSON.stringify(b.cells));
-        return new Response(JSON.stringify({ok:true}),{headers:{...h,'Content-Type':'application/json'}});
-      }
-      if(request.method==='POST'&&p==='/meta'){
-        const b=await request.json();
-        if(b.advisors) await env.RANDEVU_KV.put('advisors',JSON.stringify(b.advisors));
-        if(b.photos!==undefined) await env.RANDEVU_KV.put('photos',JSON.stringify(b.photos));
-        return new Response(JSON.stringify({ok:true}),{headers:{...h,'Content-Type':'application/json'}});
-      }
-    } catch(e){ return new Response(JSON.stringify({error:e.message}),{status:500,headers:{...h,'Content-Type':'application/json'}}); }
-    return new Response('not found',{status:404,headers:h});
-  }
-};`;
-
-document.getElementById('workerCodeBox').textContent = WORKER_CODE;
 
 // ===== SYNC =====
 function setSyncStatus(s,t){
@@ -423,7 +370,7 @@ async function fetchFromWorker() {
     renderCells(); rebuildTable();
     setSyncStatus('ok','Bağlı ✓');
     document.getElementById('syncStatusBox').className='sync-status-box ok';
-    document.getElementById('syncStatusBox').textContent='✓ Bağlantı aktif — veriler senkronize!';
+    try{document.getElementById('syncStatusBox').textContent='✓ Bağlantı aktif!';}catch(e){}
   } catch(e) {
     setSyncStatus('err','Bağlantı hatası');
   }
@@ -463,10 +410,7 @@ function startPolling() {
 }
 
 window.saveWorkerUrl = async function() {
-  const url = document.getElementById('workerUrl').value.trim().replace(/\/$/,'');
-  if(!url){ alert('URL giriniz.'); return; }
-  workerUrl = url;
-  localStorage.setItem('workerUrl', url);
+  // URL koda gömülü, ayar gerekmez
   await fetchFromWorker();
   startPolling();
 }
@@ -710,7 +654,6 @@ window.clearAll=function(){
 // ===== SETTINGS =====
 window.openSettings=function(){
   renderAdvList();
-  if(workerUrl) document.getElementById('workerUrl').value=workerUrl;
   document.getElementById('settingsOverlay').classList.add('open');
 }
 window.closeSettings=function(){ document.getElementById('settingsOverlay').classList.remove('open'); }
@@ -777,7 +720,15 @@ document.getElementById('plakaInput').addEventListener('keydown',e=>{ if(e.key==
 document.getElementById('editAdvName').addEventListener('keydown',e=>{ if(e.key==='Enter')saveEditAdvisor(); });
 
 // ===== BOOT =====
-buildTable(); buildLegend(); initDate(); renderCells();
+try {
+  buildTable();
+  buildLegend();
+  initDate();
+  renderCells();
+} catch(e) {
+  console.error('Boot error:', e);
+  document.getElementById('syncText').textContent = 'Hata: '+e.message;
+}
 </script>
 </body>
 </html>
