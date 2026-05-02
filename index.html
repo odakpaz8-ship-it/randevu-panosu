@@ -183,6 +183,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
   <button class="tbtn blue" id="btnDashboard" onclick="showPage('dashboard')">📊 Dashboard</button>
   <button class="tbtn blue" id="btnPano" onclick="showPage('pano')" style="display:none;">📋 Pano</button>
   <button class="tbtn gray" onclick="openSettings()">⚙️ Ayarlar</button>
+  <button class="tbtn blue" onclick="openTVMode()" style="background:rgba(155,89,182,0.85);">📺 TV Modu</button>
   <button class="tbtn gray" onclick="window.print()">🖨️</button>
   <button class="tbtn red"  onclick="clearAll()">🗑️</button>
 </div>
@@ -320,7 +321,7 @@ const STATUSES = [
   { code:'!',  label:'İzinli',                                    color:'#e74c3c', plaka:false, sayma:false },
   { code:'A',  label:'Anket Araması Yapıyor',                     color:'#8e44ad', plaka:false, sayma:false },
   { code:'R',  label:'Randevu GELDİ Bekliyor',                   color:'#16a085', plaka:true,  sayma:true  },
-  { code:'D',  label:'Müşteriyle DRP8 için 30 Dakika Planlandı',  color:'#d35400', plaka:false, sayma:false },
+  { code:'D',  label:'Müşteriyle DRP8 için 30 Dakika Planlandı',  color:'#d35400', plaka:true,  sayma:false },
   { code:'!!', label:'Randevusuna Geçgeç',                       color:'#c0392b', plaka:false, sayma:false },
   { code:'X',  label:'Randevusuna Gelmedi',                      color:'#7f8c8d', plaka:true,  sayma:false },
 ];
@@ -730,5 +731,145 @@ try {
   document.getElementById('syncText').textContent = 'Hata: '+e.message;
 }
 </script>
+
+<!-- TV MODE OVERLAY -->
+<div id="tvOverlay" style="display:none;position:fixed;inset:0;background:#0a1628;z-index:999;flex-direction:column;overflow:hidden;">
+  <div id="tvBar" style="background:#1a3a5c;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div style="color:#fff;font-size:22px;font-weight:700;letter-spacing:2px;">📋 RANDEVU PLANLAMA PANOSU</div>
+    <div id="tvClock" style="color:#f39c12;font-size:26px;font-weight:700;font-family:monospace;"></div>
+    <div id="tvDate" style="color:#aed6f1;font-size:18px;font-weight:600;"></div>
+    <button onclick="closeTVMode()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;padding:8px 18px;border-radius:8px;font-size:14px;cursor:pointer;">✕ Kapat</button>
+  </div>
+  <div id="tvContent" style="flex:1;overflow:hidden;padding:8px 10px;"></div>
+  <div id="tvLegend" style="background:#1a3a5c;padding:6px 16px;display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;"></div>
+</div>
+
+<style>
+#tvOverlay table { border-collapse:collapse; width:100%; height:100%; }
+#tvOverlay th { background:#1a3a5c; color:#fff; font-size:13px; padding:6px 4px; text-align:center; border:1px solid #2a4a7c; position:sticky; top:0; }
+#tvOverlay .tv-time { background:#b8d4ef; color:#1a3a5c; font-size:13px; font-weight:700; text-align:center; border:1px solid #aaa; padding:3px; white-space:nowrap; }
+#tvOverlay .tv-time.hour { background:#7fb3e8; font-size:15px; border-top:2px solid #555; }
+#tvOverlay .tv-cell { text-align:center; border:1px solid #333; font-size:14px; font-weight:700; color:#fff; padding:2px; letter-spacing:1px; }
+#tvOverlay .tv-cell.empty { background:#2a2a2a; }
+#tvOverlay .tv-cell.hour { border-top:2px solid #555; }
+#tvOverlay .tv-count { font-size:15px; font-weight:800; color:#fff; text-align:center; border:1px solid #555; }
+.tv-leg-item { display:flex;align-items:center;gap:5px;font-size:11px;color:#ddd; }
+.tv-leg-dot { width:14px;height:14px;border-radius:3px;flex-shrink:0; }
+</style>
+
+<script>
+let tvTimer = null;
+
+window.openTVMode = function() {
+  renderTV();
+  document.getElementById('tvOverlay').style.display = 'flex';
+  updateTVClock();
+  tvTimer = setInterval(() => {
+    updateTVClock();
+    if(workerUrl) {
+      fetch(`${workerUrl}/data?date=${currentDate}`)
+        .then(r=>r.json()).then(j=>{ cells=j.cells||{}; renderTV(); }).catch(()=>{});
+    }
+  }, 15000);
+}
+
+window.closeTVMode = function() {
+  document.getElementById('tvOverlay').style.display = 'none';
+  if(tvTimer) clearInterval(tvTimer);
+}
+
+function updateTVClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('tvClock').textContent = `${h}:${m}:${s}`;
+  const days = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+  const months = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  document.getElementById('tvDate').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+// Her saniye saati güncelle
+setInterval(()=>{
+  if(document.getElementById('tvOverlay').style.display!=='none') updateTVClock();
+}, 1000);
+
+function renderTV() {
+  const STATUS_MAP = {};
+  STATUSES.forEach(s => STATUS_MAP[s.code] = s);
+
+  // Dolu satırları filtrele
+  const activeTimes = TIMES.filter(t => {
+    return advisors.some((_,ai) => cells[`${ai}||${t}`]) || cells[`walkin||${t}`];
+  });
+  const displayTimes = activeTimes.length > 0 ? activeTimes : TIMES;
+
+  // Sayım satırı
+  const counts = advisors.map((_,ai) =>
+    Object.entries(cells).filter(([k,v])=>k.startsWith(`${ai}||`)&&v.sayma).length
+  );
+
+  let html = `<div style="overflow-y:auto;height:100%;"><table>
+    <thead><tr>
+      <th style="width:60px;min-width:60px;">SAAT</th>`;
+
+  advisors.forEach((name, ai) => {
+    const photo = advisorPhotos[ai];
+    const av = photo
+      ? `<img src="${photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 2px;">`
+      : `<div style="width:32px;height:32px;border-radius:50%;background:#5a8cbf;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 2px;">${getInitials(name)}</div>`;
+    html += `<th>
+      ${av}
+      <div style="font-size:11px;">${name}</div>
+      <div style="background:#cc0000;color:#fff;font-size:14px;font-weight:800;border-radius:4px;padding:1px 4px;display:inline-block;min-width:22px;">${counts[ai]}</div>
+    </th>`;
+  });
+
+  // Walkin
+  const wCnt = Object.entries(cells).filter(([k,v])=>k.startsWith('walkin||')&&v.sayma).length;
+  html += `<th><div style="font-size:11px;">Randevusuz<br>Gelen</div>
+    <div style="background:#cc0000;color:#fff;font-size:14px;font-weight:800;border-radius:4px;padding:1px 4px;display:inline-block;min-width:22px;">${wCnt}</div></th>
+    </tr></thead><tbody>`;
+
+  displayTimes.forEach(t => {
+    const isHour = t.endsWith(':00');
+    html += `<tr>
+      <td class="tv-time${isHour?' hour':''}">${t}</td>`;
+    advisors.forEach((_,ai) => {
+      const key = `${ai}||${t}`;
+      const status = cells[key];
+      const cls = `tv-cell${isHour?' hour':''} ${status?'':'empty'}`;
+      const bg = status ? status.color : '';
+      const txt = status ? (status.plaka || status.code) : '';
+      html += `<td class="${cls}" style="${bg?'background:'+bg+';':''}">${txt}</td>`;
+    });
+    const wkey = `walkin||${t}`;
+    const ws2 = cells[wkey];
+    html += `<td class="tv-cell${isHour?' hour':''} ${ws2?'':'empty'}" style="${ws2?'background:'+ws2.color+';':''}">${ws2?(ws2.plaka||ws2.code):''}</td></tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  document.getElementById('tvContent').innerHTML = html;
+
+  // Legend
+  const lg = document.getElementById('tvLegend');
+  lg.innerHTML = '';
+  STATUSES.forEach(s => {
+    const d = document.createElement('div'); d.className='tv-leg-item';
+    d.innerHTML = `<div class="tv-leg-dot" style="background:${s.color};"></div><span>${s.code} — ${s.label}</span>`;
+    lg.appendChild(d);
+  });
+}
+
+// ESC ile TV modundan çık
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape' && document.getElementById('tvOverlay').style.display!=='none') closeTVMode();
+  if(e.key==='F11' && document.getElementById('tvOverlay').style.display!=='none') {
+    if(!document.fullscreenElement) document.getElementById('tvOverlay').requestFullscreen();
+    else document.exitFullscreen();
+  }
+});
+</script>
+
 </body>
 </html>
