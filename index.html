@@ -5,871 +5,855 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Randevu Planlama Panosu</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; min-height: 100vh; }
-
-.toolbar {
-  background: #1a3a5c; color: #fff;
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px; flex-wrap: wrap; position: sticky; top: 0; z-index: 50;
-}
-.toolbar h1 { font-size: 15px; font-weight: 600; letter-spacing: 1px; flex: 1; }
-.toolbar label { font-size: 12px; opacity: 0.8; }
-.toolbar input[type=date] { font-size: 13px; padding: 4px 8px; border-radius: 6px; border: none; background: rgba(255,255,255,0.15); color: #fff; cursor: pointer; }
-.toolbar input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1); }
-.total-badge { background: rgba(255,255,255,0.18); padding: 3px 10px; border-radius: 20px; font-size: 12px; }
-.tbtn { border: none; padding: 5px 11px; border-radius: 6px; cursor: pointer; font-size: 12px; color: #fff; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-.tbtn:hover { opacity: 0.8; }
-.tbtn.red  { background: rgba(200,40,40,0.8); }
-.tbtn.gray { background: rgba(255,255,255,0.2); }
-.tbtn.blue { background: rgba(52,152,219,0.85); }
-
-.sync-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 3px; }
-.sync-dot.ok   { background: #2ecc71; }
-.sync-dot.wait { background: #f39c12; animation: pulse 1s infinite; }
-.sync-dot.err  { background: #e74c3c; }
-@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
-
-.page { display: none; }
-.page.active { display: block; }
-
-.pano-wrap { overflow-x: auto; max-height: calc(100vh - 46px); overflow-y: auto; }
-.pano-table { border-collapse: collapse; min-width: 600px; width: 100%; background: #fff; }
-.pano-table th, .pano-table td { border: 1px solid #bbb; text-align: center; vertical-align: middle; }
-.pano-table thead th { position: sticky; top: 0; z-index: 10; }
-.header-advisor { background: #cce0f5; padding: 5px 3px; min-width: 90px; font-size: 10px; font-weight: 600; color: #1a3a5c; cursor: pointer; transition: background 0.15s; user-select: none; }
-.header-advisor:hover { background: #afd0ef; }
-.header-advisor .click-hint { font-size: 9px; color: #5a8cbf; margin-top: 1px; font-weight: 400; }
-.header-walkin { background: #e0e0e0; padding: 5px 3px; min-width: 90px; font-size: 10px; font-weight: 600; color: #333; }
-.avatar-circle { width: 38px; height: 38px; border-radius: 50%; background: #5a8cbf; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 3px; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.15); overflow: hidden; }
-.avatar-circle.walkin { background: #888; }
-.count-badge { background: #cc0000; color: #fff; font-size: 11px; font-weight: 700; padding: 1px 5px; border-radius: 4px; display: inline-block; min-width: 22px; }
-.time-col { background: #ddeeff; font-size: 12px; color: #1a3a5c; padding: 2px 6px; white-space: nowrap; width: 56px; min-width: 56px; }
-.time-col.hour { font-size: 13px; font-weight: 700; background: #b8d4ef; }
-.cell { width: 90px; min-width: 90px; height: 26px; cursor: pointer; background: #d8d8d8; font-size: 11px; font-weight: 700; color: #fff; transition: opacity 0.15s, transform 0.1s; letter-spacing: 1px; }
-.cell:hover { opacity: 0.82; transform: scale(1.04); z-index: 2; position: relative; }
-.cell.hour-row { border-top: 2px solid #999; }
-.cell.walkin-cell { background: #c8c8c8; }
-
-.legend-wrap { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px; background: #fff; border-top: 2px solid #ddd; }
-.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #333; padding: 3px 8px; border-radius: 5px; border: 1px solid #ddd; background: #fafafa; }
-.legend-dot { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
-
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;}
+/* GİRİŞ */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a3a5c,#0f2a45,#1a3a5c);}
+.lbox{background:#fff;border-radius:16px;padding:40px 36px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:92%;max-width:380px;text-align:center;}
+.lbox .logo{font-size:48px;margin-bottom:8px;}
+.lbox h2{font-size:20px;font-weight:700;color:#1a3a5c;margin-bottom:4px;}
+.lbox .sub{font-size:13px;color:#888;margin-bottom:28px;}
+.linput{width:100%;padding:12px 14px;border-radius:8px;border:2px solid #e0e0e0;font-size:14px;outline:none;margin-bottom:12px;transition:border-color .2s;}
+.linput:focus{border-color:#1a3a5c;}
+.lbtn{width:100%;padding:13px;border-radius:8px;border:none;background:#1a3a5c;color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;}
+.lbtn:hover{background:#0f2a45;}
+.lerr{background:#fff5f5;border:1px solid #e74c3c;color:#c0392b;padding:10px;border-radius:8px;font-size:13px;margin-bottom:12px;display:none;}
+/* TOOLBAR */
+.toolbar{background:#1a3a5c;color:#fff;display:flex;align-items:center;gap:8px;padding:8px 14px;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
+.toolbar h1{font-size:15px;font-weight:600;letter-spacing:1px;flex:1;}
+.toolbar input[type=date]{font-size:13px;padding:4px 8px;border-radius:6px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;}
+.toolbar input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);}
+.badge{background:rgba(255,255,255,.18);padding:3px 10px;border-radius:20px;font-size:12px;}
+.ubadge{background:rgba(39,174,96,.3);border:1px solid rgba(39,174,96,.5);padding:3px 10px;border-radius:20px;font-size:12px;}
+.tbtn{border:none;padding:5px 11px;border-radius:6px;cursor:pointer;font-size:12px;color:#fff;white-space:nowrap;}
+.tbtn:hover{opacity:.8;}
+.tbtn.red{background:rgba(200,40,40,.8);}
+.tbtn.gray{background:rgba(255,255,255,.2);}
+.tbtn.blue{background:rgba(52,152,219,.85);}
+.tbtn.purple{background:rgba(155,89,182,.85);}
+/* PAGES */
+.page{display:none;}.page.active{display:block;}
+/* PANO */
+.pano-wrap{overflow-x:auto;max-height:calc(100vh - 46px);overflow-y:auto;}
+.pano-table{border-collapse:collapse;min-width:600px;width:100%;background:#fff;}
+.pano-table th,.pano-table td{border:1px solid #bbb;text-align:center;vertical-align:middle;}
+.pano-table thead th{position:sticky;top:0;z-index:10;}
+.hadv{background:#cce0f5;padding:5px 3px;min-width:90px;font-size:10px;font-weight:600;color:#1a3a5c;cursor:pointer;transition:background .15s;user-select:none;}
+.hadv:hover{background:#afd0ef;}
+.hadv .hint{font-size:9px;color:#5a8cbf;margin-top:1px;font-weight:400;}
+.hwal{background:#e0e0e0;padding:5px 3px;min-width:90px;font-size:10px;font-weight:600;color:#333;}
+.avc{width:38px;height:38px;border-radius:50%;background:#5a8cbf;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 3px;border:2px solid #fff;overflow:hidden;}
+.avc.w{background:#888;}
+.cbadge{background:#cc0000;color:#fff;font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px;display:inline-block;min-width:22px;}
+.tcol{background:#ddeeff;font-size:12px;color:#1a3a5c;padding:2px 6px;white-space:nowrap;width:56px;min-width:56px;}
+.tcol.h{font-size:13px;font-weight:700;background:#b8d4ef;}
+.cell{width:90px;min-width:90px;height:26px;cursor:pointer;background:#d8d8d8;font-size:11px;font-weight:700;color:#fff;transition:opacity .15s,transform .1s;letter-spacing:1px;}
+.cell:hover{opacity:.82;transform:scale(1.04);z-index:2;position:relative;}
+.cell.hr{border-top:2px solid #999;}
+.cell.wc{background:#c8c8c8;}
+/* LEGEND */
+.lgwrap{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:#fff;border-top:2px solid #ddd;}
+.lgitem{display:flex;align-items:center;gap:5px;font-size:11px;color:#333;padding:3px 8px;border-radius:5px;border:1px solid #ddd;background:#fafafa;}
+.lgdot{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
 /* DASHBOARD */
-.dashboard { padding: 16px; max-height: calc(100vh - 46px); overflow-y: auto; }
-.dash-date-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-.dash-date-bar h2 { font-size: 16px; font-weight: 600; color: #1a3a5c; flex: 1; }
-.dash-date-bar input[type=date] { font-size: 13px; padding: 5px 10px; border-radius: 6px; border: 1.5px solid #b8d4ef; color: #1a3a5c; }
-.stat-cards { display: grid; grid-template-columns: repeat(auto-fill,minmax(130px,1fr)); gap: 10px; margin-bottom: 18px; }
-.stat-card { background: #fff; border-radius: 10px; padding: 14px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #5a8cbf; text-align: center; }
-.stat-card .sc-num { font-size: 28px; font-weight: 700; color: #1a3a5c; line-height: 1; }
-.stat-card .sc-lbl { font-size: 11px; color: #888; margin-top: 4px; }
-.adv-dash-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(195px,1fr)); gap: 10px; margin-bottom: 18px; }
-.adv-dash-card { background: #fff; border-radius: 10px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
-.adv-dash-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.adv-dash-av { width: 34px; height: 34px; border-radius: 50%; background: #5a8cbf; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
-.adv-dash-av img { width: 100%; height: 100%; object-fit: cover; }
-.adv-dash-name { font-size: 12px; font-weight: 600; color: #1a3a5c; }
-.adv-dash-status { font-size: 10px; color: #888; }
-.adv-stat-row { display: flex; justify-content: space-between; font-size: 11px; color: #555; margin-bottom: 4px; }
-.adv-stat-row span:last-child { font-weight: 700; color: #1a3a5c; }
-.plaka-chip { display: inline-block; background: #f0f7ff; border: 1px solid #b8d4ef; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: 700; color: #1a3a5c; margin: 2px; letter-spacing: 1px; }
-.plaka-chip.gelmedi { background: #f5f5f5; border-color: #ccc; color: #888; text-decoration: line-through; }
-.adv-plaka-list { margin-top: 7px; }
-.adv-plaka-title { font-size: 10px; color: #888; margin-bottom: 3px; font-weight: 600; }
-.gelmedi-section { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
-.gelmedi-section h3 { font-size: 13px; font-weight: 600; color: #7f8c8d; margin-bottom: 10px; }
-.gelmedi-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.gelmedi-table th { background: #f5f5f5; padding: 6px 10px; text-align: left; color: #555; font-weight: 600; border-bottom: 1px solid #ddd; }
-.gelmedi-table td { padding: 6px 10px; border-bottom: 1px solid #f0f0f0; }
-
+.dash{padding:16px;max-height:calc(100vh - 46px);overflow-y:auto;}
+.dbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.dbar h2{font-size:16px;font-weight:600;color:#1a3a5c;flex:1;}
+.dbar input[type=date]{font-size:13px;padding:5px 10px;border-radius:6px;border:1.5px solid #b8d4ef;color:#1a3a5c;outline:none;}
+.scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:18px;}
+.scard{background:#fff;border-radius:10px;padding:14px 12px;box-shadow:0 2px 8px rgba(0,0,0,.08);border-left:4px solid #5a8cbf;text-align:center;}
+.scard .n{font-size:28px;font-weight:700;line-height:1;}
+.scard .l{font-size:11px;color:#888;margin-top:4px;}
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px;margin-bottom:18px;}
+.acard{background:#fff;border-radius:10px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.ahead{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.aav{width:34px;height:34px;border-radius:50%;background:#5a8cbf;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.aav img{width:100%;height:100%;object-fit:cover;}
+.aname{font-size:12px;font-weight:600;color:#1a3a5c;}
+.astat{font-size:10px;color:#888;}
+.srow{display:flex;justify-content:space-between;font-size:11px;color:#555;margin-bottom:4px;}
+.srow span:last-child{font-weight:700;color:#1a3a5c;}
+.pchip{display:inline-block;background:#f0f7ff;border:1px solid #b8d4ef;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;color:#1a3a5c;margin:2px;letter-spacing:1px;}
+.pchip.g{background:#f5f5f5;border-color:#ccc;color:#888;text-decoration:line-through;}
+.pllist{margin-top:7px;}
+.pltitle{font-size:10px;color:#888;margin-bottom:3px;font-weight:600;}
+.gsec{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.gsec h3{font-size:13px;font-weight:600;color:#7f8c8d;margin-bottom:10px;}
+.gtbl{width:100%;border-collapse:collapse;font-size:12px;}
+.gtbl th{background:#f5f5f5;padding:6px 10px;text-align:left;color:#555;font-weight:600;border-bottom:1px solid #ddd;}
+.gtbl td{padding:6px 10px;border-bottom:1px solid #f0f0f0;}
+/* ADVISOR PORTAL */
+#advScreen{display:none;min-height:100vh;flex-direction:column;}
+.atbar{background:#1a3a5c;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
+.atbar h1{font-size:15px;font-weight:600;flex:1;}
+.abtn{border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;color:#fff;}
+.abtn.red{background:rgba(200,40,40,.8);}
+.abtn.gray{background:rgba(255,255,255,.2);}
+.aportal{padding:16px;max-width:800px;margin:0 auto;}
+.adatebar{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.adatebar h2{font-size:16px;font-weight:600;color:#1a3a5c;flex:1;}
+.adatebar input[type=date]{font-size:13px;padding:6px 10px;border-radius:6px;border:1.5px solid #b8d4ef;color:#1a3a5c;outline:none;}
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:16px;}
+.sumcard{background:#fff;border-radius:8px;padding:10px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.07);border-top:3px solid #ddd;}
+.sumcard .sn{font-size:24px;font-weight:700;line-height:1;}
+.sumcard .sl{font-size:10px;color:#888;margin-top:3px;}
+.slotgrid{display:flex;flex-direction:column;gap:6px;}
+.slotcard{background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.07);display:flex;align-items:center;gap:12px;border-left:5px solid #d8d8d8;cursor:pointer;transition:all .15s;}
+.slotcard:hover{box-shadow:0 4px 12px rgba(0,0,0,.12);transform:translateX(2px);}
+.slotcard.hr{border-left-width:5px;}
+.stime{font-size:15px;font-weight:700;color:#1a3a5c;width:50px;flex-shrink:0;}
+.scode{font-size:13px;font-weight:700;color:#fff;padding:3px 10px;border-radius:5px;display:inline-block;}
+.slbl{font-size:12px;color:#555;margin-top:2px;}
+.splaka{font-size:13px;font-weight:700;color:#1a3a5c;letter-spacing:2px;margin-top:2px;}
+.sempty{font-size:12px;color:#bbb;font-style:italic;}
+.pwdform{background:#f0f7ff;border-radius:10px;padding:16px;border:1px solid #b8d4ef;margin-top:16px;}
+.pwdform h3{font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:10px;}
+.pwdinput{width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #b8d4ef;font-size:13px;outline:none;margin-bottom:8px;}
+.pwdbtn{width:100%;padding:9px;border-radius:7px;border:none;background:#1a3a5c;color:#fff;font-size:13px;font-weight:600;cursor:pointer;}
 /* MODALS */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
-.modal-overlay.open { display: flex; }
-.adv-modal { background: #fff; border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.25); width: 94%; max-width: 400px; max-height: 92vh; overflow-y: auto; }
-.modal-header { background: #1a3a5c; color: #fff; padding: 12px 16px; border-radius: 14px 14px 0 0; display: flex; align-items: center; gap: 10px; }
-.modal-header .av { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
-.modal-header .av img { width: 100%; height: 100%; object-fit: cover; }
-.modal-header h3 { font-size: 14px; font-weight: 600; }
-.modal-header .sub { font-size: 11px; opacity: 0.75; }
-.modal-close { margin-left: auto; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
-.modal-body { padding: 14px 16px; }
-.section-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 7px; padding-bottom: 4px; border-bottom: 1px solid #eee; }
-.section-title:first-child { margin-top: 0; }
-.bulk-card { border: 1.5px solid #ddd; border-radius: 10px; padding: 9px 11px; margin-bottom: 6px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 9px; }
-.bulk-card:hover { border-color: #5a8cbf; background: #f0f7ff; }
-.bulk-card.active { border-color: #27ae60; background: #f0fff4; }
-.bulk-icon { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-.bulk-info strong { font-size: 12px; font-weight: 600; color: #1a3a5c; display: block; }
-.bulk-info span { font-size: 10px; color: #888; }
-.bulk-check { font-size: 16px; color: #27ae60; }
-.range-expand { display: none; margin-top: 6px; padding: 10px; background: #fff5f5; border-radius: 8px; border: 1px solid #e74c3c; }
-.range-expand.yemek { background: #fffbf0; border-color: #f39c12; }
-.range-expand.open { display: block; }
-.time-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.time-row label { font-size: 11px; color: #555; width: 55px; flex-shrink: 0; }
-.time-select { flex: 1; padding: 5px 7px; border-radius: 6px; border: 1px solid #ccc; font-size: 12px; }
-.range-apply-btn { width: 100%; padding: 7px; border-radius: 6px; border: none; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
-.range-apply-btn.izin { background: #e74c3c; }
-.range-apply-btn.yemek { background: #f39c12; }
-.clear-adv-btn { width: 100%; padding: 8px; border-radius: 7px; border: 1.5px solid #ccc; background: #f5f5f5; color: #555; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 3px; }
-.clear-adv-btn:hover { background: #ffe5e5; border-color: #e74c3c; color: #c0392b; }
-.cell-modal { background: #fff; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.22); padding: 16px; width: 92%; max-width: 340px; max-height: 92vh; overflow-y: auto; }
-.cell-modal h3 { font-size: 14px; font-weight: 600; margin-bottom: 5px; color: #1a3a5c; }
-.cmodal-info { font-size: 12px; color: #666; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-.plaka-section { margin-bottom: 10px; background: #f0f7ff; border-radius: 8px; padding: 10px 12px; border: 1px solid #b8d4ef; }
-.plaka-section label { font-size: 11px; font-weight: 700; color: #1a3a5c; display: block; margin-bottom: 5px; }
-.plaka-input { width: 100%; padding: 8px 10px; border-radius: 7px; border: 1.5px solid #5a8cbf; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: #1a3a5c; outline: none; background: #fff; }
-.plaka-input:focus { border-color: #1a3a5c; }
-.plaka-hint { font-size: 10px; color: #888; margin-top: 3px; }
-.status-options { display: flex; flex-direction: column; gap: 5px; }
-.status-btn { padding: 8px 12px; border-radius: 7px; border: none; cursor: pointer; font-size: 12px; font-weight: 600; text-align: left; color: #fff; transition: opacity 0.15s, transform 0.1s; }
-.status-btn:hover { opacity: 0.88; transform: translateX(3px); }
-.modal-cancel { margin-top: 8px; width: 100%; padding: 8px; border-radius: 7px; border: 1px solid #ccc; background: #f5f5f5; cursor: pointer; font-size: 12px; color: #555; }
-.back-btn { margin-top: 5px; width: 100%; padding: 7px; border-radius: 7px; border: 1px solid #5a8cbf; background: #f0f7ff; cursor: pointer; font-size: 12px; color: #1a3a5c; }
-.settings-modal { background: #fff; border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.25); width: 94%; max-width: 500px; max-height: 92vh; overflow-y: auto; }
-.settings-tabs { display: flex; border-bottom: 2px solid #eee; }
-.stab { flex: 1; padding: 9px; text-align: center; cursor: pointer; font-size: 12px; font-weight: 600; color: #888; border: none; background: none; }
-.stab.active { color: #1a3a5c; border-bottom: 2px solid #1a3a5c; margin-bottom: -2px; }
-.stab-body { padding: 14px; }
-.stab-content { display: none; }
-.stab-content.active { display: block; }
-.adv-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
-.adv-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; }
-.adv-row .adv-av { width: 34px; height: 34px; border-radius: 50%; background: #5a8cbf; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; cursor: pointer; position: relative; }
-.adv-row .adv-av img { width: 100%; height: 100%; object-fit: cover; }
-.adv-row .adv-av:hover::after { content: '📷'; position: absolute; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 50%; }
-.adv-row .adv-name { flex: 1; font-size: 12px; font-weight: 500; color: #1a3a5c; }
-.adv-row .adv-edit-btn, .adv-row .adv-del-btn { font-size: 11px; padding: 3px 7px; border-radius: 5px; cursor: pointer; }
-.adv-row .adv-edit-btn { border: 1px solid #5a8cbf; background: #f0f7ff; color: #1a3a5c; }
-.adv-row .adv-del-btn { border: 1px solid #e74c3c; background: #fff5f5; color: #c0392b; }
-.add-adv-form { background: #f0f7ff; border-radius: 10px; padding: 11px; border: 1px solid #b8d4ef; }
-.add-adv-form label { font-size: 11px; font-weight: 700; color: #1a3a5c; display: block; margin-bottom: 4px; }
-.add-adv-form input[type=text] { width: 100%; padding: 7px 9px; border-radius: 6px; border: 1.5px solid #5a8cbf; font-size: 12px; color: #1a3a5c; outline: none; margin-bottom: 7px; }
-.add-adv-btn { width: 100%; padding: 8px; border-radius: 7px; border: none; background: #1a3a5c; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+.moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;}
+.moverlay.open{display:flex;}
+.amodal{background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.25);width:94%;max-width:400px;max-height:92vh;overflow-y:auto;}
+.mhead{background:#1a3a5c;color:#fff;padding:12px 16px;border-radius:14px 14px 0 0;display:flex;align-items:center;gap:10px;}
+.mhead .av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;overflow:hidden;}
+.mhead .av img{width:100%;height:100%;object-fit:cover;}
+.mhead h3{font-size:14px;font-weight:600;}
+.mhead .sub{font-size:11px;opacity:.75;}
+.mclose{margin-left:auto;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;}
+.mbody{padding:14px 16px;}
+.stitle{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin:14px 0 7px;padding-bottom:4px;border-bottom:1px solid #eee;}
+.stitle:first-child{margin-top:0;}
+.bcard{border:1.5px solid #ddd;border-radius:10px;padding:9px 11px;margin-bottom:6px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:9px;}
+.bcard:hover{border-color:#5a8cbf;background:#f0f7ff;}
+.bcard.active{border-color:#27ae60;background:#f0fff4;}
+.bicon{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.binfo strong{font-size:12px;font-weight:600;color:#1a3a5c;display:block;}
+.binfo span{font-size:10px;color:#888;}
+.bcheck{font-size:16px;color:#27ae60;}
+.rexp{display:none;margin-top:6px;padding:10px;background:#fff5f5;border-radius:8px;border:1px solid #e74c3c;}
+.rexp.ym{background:#fffbf0;border-color:#f39c12;}
+.rexp.open{display:block;}
+.trow{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.trow label{font-size:11px;color:#555;width:55px;flex-shrink:0;}
+.tsel{flex:1;padding:5px 7px;border-radius:6px;border:1px solid #ccc;font-size:12px;}
+.rapbtn{width:100%;padding:7px;border-radius:6px;border:none;color:#fff;font-size:12px;font-weight:700;cursor:pointer;}
+.rapbtn.iz{background:#e74c3c;}
+.rapbtn.ym{background:#f39c12;}
+.cadbtn{width:100%;padding:8px;border-radius:7px;border:1.5px solid #ccc;background:#f5f5f5;color:#555;font-size:12px;font-weight:600;cursor:pointer;margin-top:3px;}
+.cadbtn:hover{background:#ffe5e5;border-color:#e74c3c;color:#c0392b;}
+.cmodal{background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.22);padding:16px;width:92%;max-width:340px;max-height:92vh;overflow-y:auto;}
+.cmodal h3{font-size:14px;font-weight:600;margin-bottom:5px;color:#1a3a5c;}
+.cinfo{font-size:12px;color:#666;margin-bottom:10px;border-bottom:1px solid #eee;padding-bottom:8px;}
+.plaksec{margin-bottom:10px;background:#f0f7ff;border-radius:8px;padding:10px 12px;border:1px solid #b8d4ef;}
+.plaksec label{font-size:11px;font-weight:700;color:#1a3a5c;display:block;margin-bottom:5px;}
+.plakinput{width:100%;padding:8px 10px;border-radius:7px;border:1.5px solid #5a8cbf;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#1a3a5c;outline:none;background:#fff;}
+.sopts{display:flex;flex-direction:column;gap:5px;}
+.sbtn{padding:8px 12px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:600;text-align:left;color:#fff;transition:opacity .15s,transform .1s;}
+.sbtn:hover{opacity:.88;transform:translateX(3px);}
+.mcancel{margin-top:8px;width:100%;padding:8px;border-radius:7px;border:1px solid #ccc;background:#f5f5f5;cursor:pointer;font-size:12px;color:#555;}
+.backbtn{margin-top:5px;width:100%;padding:7px;border-radius:7px;border:1px solid #5a8cbf;background:#f0f7ff;cursor:pointer;font-size:12px;color:#1a3a5c;}
+.smodal{background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.25);width:94%;max-width:500px;max-height:92vh;overflow-y:auto;}
+.stabs{display:flex;border-bottom:2px solid #eee;}
+.stab{flex:1;padding:9px;text-align:center;cursor:pointer;font-size:12px;font-weight:600;color:#888;border:none;background:none;}
+.stab.active{color:#1a3a5c;border-bottom:2px solid #1a3a5c;margin-bottom:-2px;}
+.sbody{padding:14px;}
+.scont{display:none;}.scont.active{display:block;}
+.advlist{display:flex;flex-direction:column;gap:7px;margin-bottom:12px;}
+.advrow{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid #ddd;border-radius:8px;background:#fafafa;}
+.advrow .aav2{width:34px;height:34px;border-radius:50%;background:#5a8cbf;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;cursor:pointer;position:relative;}
+.advrow .aav2 img{width:100%;height:100%;object-fit:cover;}
+.advrow .aav2:hover::after{content:'+';position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:14px;border-radius:50%;}
+.advrow .an{flex:1;font-size:12px;font-weight:500;color:#1a3a5c;}
+.advrow .eb,.advrow .db{font-size:11px;padding:3px 7px;border-radius:5px;cursor:pointer;}
+.advrow .eb{border:1px solid #5a8cbf;background:#f0f7ff;color:#1a3a5c;}
+.advrow .db{border:1px solid #e74c3c;background:#fff5f5;color:#c0392b;}
+.addform{background:#f0f7ff;border-radius:10px;padding:11px;border:1px solid #b8d4ef;}
+.addform label{font-size:11px;font-weight:700;color:#1a3a5c;display:block;margin-bottom:4px;}
+.addform input{width:100%;padding:7px 9px;border-radius:6px;border:1.5px solid #5a8cbf;font-size:12px;color:#1a3a5c;outline:none;margin-bottom:7px;}
+.addbtn{width:100%;padding:8px;border-radius:7px;border:none;background:#1a3a5c;color:#fff;font-size:12px;font-weight:600;cursor:pointer;}
+.emodal{background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.22);padding:18px;width:90%;max-width:300px;}
+.emodal h3{font-size:14px;font-weight:600;margin-bottom:11px;color:#1a3a5c;}
+.emodal input{width:100%;padding:7px 9px;border-radius:6px;border:1.5px solid #5a8cbf;font-size:13px;outline:none;margin-bottom:9px;}
+.esavebtn{width:100%;padding:8px;border-radius:7px;border:none;background:#1a3a5c;color:#fff;font-size:12px;font-weight:600;cursor:pointer;}
+/* TV */
+#tvOverlay{display:none;position:fixed;inset:0;background:#0a1628;z-index:999;flex-direction:column;overflow:hidden;}
+#tvBar{background:#1a3a5c;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#tvContent{flex:1;overflow:hidden;padding:8px 10px;}
+#tvLegend{background:#1a3a5c;padding:6px 16px;display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;}
+#tvOverlay table{border-collapse:collapse;width:100%;}
+#tvOverlay th{background:#1a3a5c;color:#fff;font-size:13px;padding:6px 4px;text-align:center;border:1px solid #2a4a7c;}
+.tvtime{background:#b8d4ef;color:#1a3a5c;font-size:13px;font-weight:700;text-align:center;border:1px solid #aaa;padding:3px;white-space:nowrap;}
+.tvtime.h{background:#7fb3e8;font-size:15px;border-top:2px solid #555;}
+.tvcell{text-align:center;border:1px solid #333;font-size:14px;font-weight:700;color:#fff;padding:2px;letter-spacing:1px;}
+.tvcell.e{background:#2a2a2a;}
+.tvcell.h{border-top:2px solid #555;}
+.tvleg{display:flex;align-items:center;gap:5px;font-size:11px;color:#ddd;}
+.tvlegdot{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
 
-/* Sync URL ayar formu */
-.sync-form { background: #f0f7ff; border-radius: 10px; padding: 14px; border: 1px solid #b8d4ef; }
-.sync-form label { font-size: 11px; font-weight: 700; color: #1a3a5c; display: block; margin-bottom: 5px; }
-.sync-form input { width: 100%; padding: 7px 10px; border-radius: 6px; border: 1.5px solid #5a8cbf; font-size: 12px; outline: none; margin-bottom: 8px; }
-.sync-save-btn { width: 100%; padding: 9px; border-radius: 7px; border: none; background: #27ae60; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }
-.sync-status-box { padding: 8px 12px; border-radius: 7px; font-size: 12px; margin-bottom: 10px; }
-.sync-status-box.ok   { background: #f0fff4; border: 1px solid #27ae60; color: #1a7a40; }
-.sync-status-box.err  { background: #fff5f5; border: 1px solid #e74c3c; color: #c0392b; }
-.sync-status-box.none { background: #f5f5f5; border: 1px solid #ccc; color: #888; }
+.rapor-kart { background:#fff; border-radius:8px; padding:12px; text-align:center; border:0.5px solid #ddd; border-top:3px solid #ddd; }
+.rapor-kart .rn { font-size:22px; font-weight:700; line-height:1; }
+.rapor-kart .rl { font-size:10px; color:#888; margin-top:3px; }
+.rtablo th { background:#1a3a5c; color:#fff; padding:7px 10px; text-align:center; font-size:11px; font-weight:600; border:1px solid #2a4a7c; }
+.rtablo td { padding:6px 10px; text-align:center; font-size:12px; border:1px solid #ddd; }
+.rtablo tr:nth-child(even) td { background:#f8f9fa; }
+.rtablo tr:hover td { background:#eef5ff; }
+.puyari { display:inline-block; background:#fff5f5; border:1.5px solid #e74c3c; border-radius:6px; padding:5px 10px; font-size:12px; font-weight:700; color:#c0392b; letter-spacing:1px; }
+.puyari span { font-size:10px; font-weight:400; color:#e74c3c; margin-left:4px; }
+.oto-uyari { position:fixed; top:60px; right:16px; background:#c0392b; color:#fff; padding:10px 16px; border-radius:8px; font-size:13px; font-weight:600; z-index:999; box-shadow:0 4px 12px rgba(0,0,0,0.2); display:none; max-width:300px; }
 
-.edit-modal { background: #fff; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.22); padding: 18px; width: 90%; max-width: 300px; }
-.edit-modal h3 { font-size: 14px; font-weight: 600; margin-bottom: 11px; color: #1a3a5c; }
-.edit-modal input { width: 100%; padding: 7px 9px; border-radius: 6px; border: 1.5px solid #5a8cbf; font-size: 13px; outline: none; margin-bottom: 9px; }
-.edit-save-btn { width: 100%; padding: 8px; border-radius: 7px; border: none; background: #1a3a5c; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
-
-.steps { font-size: 12px; color: #444; line-height: 2; }
-.steps a { color: #5a8cbf; }
-.steps b { color: #1a3a5c; }
-.step-box { background: #1a3a5c; color: #e0eaf5; font-family: monospace; font-size: 12px; padding: 10px 12px; border-radius: 8px; margin: 8px 0; line-height: 1.7; }
 </style>
 </head>
 <body>
 
-<div class="toolbar">
-  <h1>📋 RANDEVU PLANLAMA PANOSU</h1>
-  <label>Tarih:</label>
-  <input type="date" id="dateInput" onchange="onDateChange()">
-  <span class="total-badge" id="totalBadge">Randevu: 0</span>
-  <span id="syncStatus" style="font-size:11px;display:flex;align-items:center;display:none;">
-    <span class="sync-dot wait" id="syncDot"></span>
-    <span id="syncText">Çevrimdışı</span>
-  </span>
-  <button class="tbtn blue" id="btnDashboard" onclick="showPage('dashboard')">📊 Dashboard</button>
-  <button class="tbtn blue" id="btnPano" onclick="showPage('pano')" style="display:none;">📋 Pano</button>
-  <button class="tbtn gray" onclick="openSettings()">⚙️ Ayarlar</button>
-  <button class="tbtn blue" onclick="openTVMode()" style="background:rgba(155,89,182,0.85);">📺 TV Modu</button>
-  <button class="tbtn gray" onclick="window.print()">🖨️</button>
-  <button class="tbtn red"  onclick="clearAll()">🗑️</button>
-</div>
-
-<div class="page active" id="page-pano">
-  <div class="pano-wrap">
-    <table class="pano-table"><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table>
-  </div>
-  <div class="legend-wrap" id="legend"></div>
-</div>
-
-<div class="page" id="page-dashboard">
-  <div class="dashboard">
-    <div class="dash-date-bar">
-      <h2>📊 Günlük Dashboard</h2>
-      <input type="date" id="dashDate" onchange="renderDashboard()">
-    </div>
-    <div class="stat-cards" id="dashStatCards"></div>
-    <div class="adv-dash-grid" id="dashAdvGrid"></div>
-    <div class="gelmedi-section">
-      <h3>🚫 Randevusuna Gelmeyenler</h3>
-      <table class="gelmedi-table">
-        <thead><tr><th>Danışman</th><th>Saat</th><th>Plaka</th></tr></thead>
-        <tbody id="gelmediBody"></tbody>
-      </table>
-    </div>
+<!-- GİRİŞ -->
+<div id="loginScreen">
+  <div class="lbox">
+    <div style="font-size:48px;font-weight:700;color:#1a3a5c;">RP</div>
+    <h2>Randevu Planlama</h2>
+    <div class="sub">Devam etmek için giriş yapın</div>
+    <div class="lerr" id="lerr"></div>
+    <input class="linput" id="luser" type="text" placeholder="Kullanıcı adı" autocomplete="username">
+    <input class="linput" id="lpass" type="password" placeholder="Şifre" autocomplete="current-password">
+    <button class="lbtn" onclick="doLogin()">Giris Yap</button>
   </div>
 </div>
 
-<!-- ADVISOR PANEL -->
-<div class="modal-overlay" id="advisorOverlay">
-  <div class="adv-modal">
-    <div class="modal-header">
-      <div class="av" id="apAvatar"></div>
-      <div><h3 id="apName"></h3><div class="sub" id="apDate"></div></div>
-      <button class="modal-close" onclick="closeAdvisorPanel()">✕</button>
+<!-- DANIŞMAN PORTALI -->
+<div id="advScreen">
+  <div class="atbar">
+    <h1>RANDEVU TAKIP</h1>
+    <span class="badge" id="advBadge"></span>
+    <button class="abtn gray" onclick="showAdvTab('plan')">Planim</button>
+    <button class="abtn gray" onclick="showAdvTab('pwd')">Sifre</button>
+    <button class="abtn red" onclick="doLogout()">Çıkış</button>
+  </div>
+  <div class="aportal">
+    <div id="advTabPlan">
+      <div class="adatebar">
+        <h2 id="advTitle">Günlük Planım</h2>
+        <input type="date" id="advDate" onchange="loadAdvPlan()">
+      </div>
+      <div class="sumgrid" id="advSum"></div>
+      <div class="slotgrid" id="slotGrid"></div>
     </div>
-    <div class="modal-body">
-      <div class="section-title">Toplu İşlemler</div>
-      <div class="bulk-card" id="allDayIzinCard" onclick="toggleAllDayIzin()">
-        <div class="bulk-icon" style="background:#fde8e8;">🏖️</div>
-        <div class="bulk-info"><strong>Tüm Gün İzinli</strong><span>Tüm saatleri izinli işaretle</span></div>
-        <div class="bulk-check" id="allDayCheck" style="display:none;">✓</div>
+    <div id="advTabPwd" style="display:none;">
+      <div class="pwdform">
+        <h3>Sifremi Değiştir</h3>
+        <input class="pwdinput" type="password" id="oldPwd" placeholder="Mevcut şifre">
+        <input class="pwdinput" type="password" id="newPwd" placeholder="Yeni şifre">
+        <input class="pwdinput" type="password" id="newPwd2" placeholder="Yeni şifre (tekrar)">
+        <button class="pwdbtn" onclick="changePwd()">Guncelle</button>
+        <div id="pwdMsg" style="margin-top:8px;font-size:12px;"></div>
       </div>
-      <div class="bulk-card" onclick="toggleRangeExpand('izin')">
-        <div class="bulk-icon" style="background:#fde8e8;">⏰</div>
-        <div class="bulk-info"><strong>Belirli Saatte İzin</strong><span>Seçilen aralığı izinli yap</span></div>
-        <div style="font-size:11px;color:#e74c3c;font-weight:700;">▼</div>
-      </div>
-      <div class="range-expand" id="izinExpand">
-        <div class="time-row"><label>Başlangıç</label><select class="time-select" id="izinStart"></select></div>
-        <div class="time-row"><label>Bitiş</label><select class="time-select" id="izinEnd"></select></div>
-        <button class="range-apply-btn izin" onclick="applyRange('izin')">✓ İzin Uygula</button>
-      </div>
-      <div class="bulk-card" onclick="toggleRangeExpand('yemek')">
-        <div class="bulk-icon" style="background:#fef9e7;">🍽️</div>
-        <div class="bulk-info"><strong>Yemek Paydosu</strong><span>Varsayılan 12:30–13:30</span></div>
-        <div style="font-size:11px;color:#f39c12;font-weight:700;">▼</div>
-      </div>
-      <div class="range-expand yemek" id="yemekExpand">
-        <div class="time-row"><label>Başlangıç</label><select class="time-select" id="yemekStart"></select></div>
-        <div class="time-row"><label>Bitiş</label><select class="time-select" id="yemekEnd"></select></div>
-        <button class="range-apply-btn yemek" onclick="applyRange('yemek')">✓ Yemek Paydosu Uygula</button>
-      </div>
-      <div class="section-title">Temizle</div>
-      <button class="clear-adv-btn" onclick="clearAdvisorDay()">🗑️ Bugünkü Tüm Kayıtları Sil</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMİN -->
+<div id="adminScreen" style="display:none;">
+  <div class="toolbar">
+    <h1>RANDEVU PLANLAMA PANOSU</h1>
+    <label style="font-size:12px;opacity:.8;">Tarih:</label>
+    <input type="date" id="dateInput" onchange="onDateChange()">
+    <span class="badge" id="totBadge">Randevu: 0</span>
+    <span class="ubadge" id="uBadge">admin</span>
+    <button class="tbtn blue" id="btnDash" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="tbtn blue" id="btnPano" onclick="showPage('pano')" style="display:none;"> Pano</button>
+    <button class="tbtn purple" onclick="openTV()">TV Modu</button>
+    <button class="tbtn green" onclick="openRapor()" style="background:rgba(39,174,96,0.85);">Rapor</button>
+    <button class="tbtn gray" onclick="openSettings()">Ayarlar</button>
+    <button class="tbtn gray" onclick="window.print()">Yazdir</button>
+    <button class="tbtn red" onclick="clearAll()">Temizle</button>
+    <button class="tbtn gray" onclick="doLogout()" style="background:rgba(100,100,100,.6);">Çıkış</button>
+  </div>
+  <div class="page active" id="page-pano">
+    <div class="pano-wrap"><table class="pano-table"><thead id="tHead"></thead><tbody id="tBody"></tbody></table></div>
+    <div class="lgwrap" id="lgWrap"></div>
+  </div>
+  <div class="page" id="page-dashboard">
+    <div class="dash">
+      <div class="dbar"><h2>Günlük Dashboard</h2><input type="date" id="dashDate" onchange="renderDash()"></div>
+      <div class="scards" id="statCards"></div>
+      <div class="agrid" id="advGrid"></div>
+      <div class="gsec"><h3>Randevusuna Gelmeyenler</h3><table class="gtbl"><thead><tr><th>Danışman</th><th>Saat</th><th>Plaka</th></tr></thead><tbody id="gelBody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADVISOR BULK MODAL -->
+<div class="moverlay" id="advOverlay">
+  <div class="amodal">
+    <div class="mhead"><div class="av" id="apAv"></div><div><h3 id="apNm"></h3><div class="sub" id="apDt"></div></div><button class="mclose" onclick="closeAdvPanel()">X</button></div>
+    <div class="mbody">
+      <div class="stitle">Toplu İşlemler</div>
+      <div class="bcard" id="allIzinCard" onclick="toggleAllIzin()"><div class="bicon" style="background:#fde8e8;">IZ</div><div class="binfo"><strong>Tüm Gün İzinli</strong><span>Tüm saatleri izinli işaretle</span></div><div class="bcheck" id="allIzinChk" style="display:none;">V</div></div>
+      <div class="bcard" onclick="toggleRng('iz')"><div class="bicon" style="background:#fde8e8;">SR</div><div class="binfo"><strong>Belirli Saatte İzin</strong><span>Seçilen aralığı izinli yap</span></div><div style="font-size:11px;color:#e74c3c;font-weight:700;"></div></div>
+      <div class="rexp" id="izExp"><div class="trow"><label>Başlangıç</label><select class="tsel" id="izS"></select></div><div class="trow"><label>Bitiş</label><select class="tsel" id="izE"></select></div><button class="rapbtn iz" onclick="applyRng('iz')">V İzin Uygula</button></div>
+      <div class="bcard" onclick="toggleRng('ym')"><div class="bicon" style="background:#fef9e7;">YM</div><div class="binfo"><strong>Yemek Paydosu</strong><span>Varsayılan 12:30–13:30</span></div><div style="font-size:11px;color:#f39c12;font-weight:700;"></div></div>
+      <div class="rexp ym" id="ymExp"><div class="trow"><label>Başlangıç</label><select class="tsel" id="ymS"></select></div><div class="trow"><label>Bitiş</label><select class="tsel" id="ymE"></select></div><button class="rapbtn ym" onclick="applyRng('ym')">V Yemek Paydosu Uygula</button></div>
+      <div class="stitle">Temizle</div>
+      <button class="cadbtn" onclick="clearAdvDay()">Temizle Bugünkü Tüm Kayıtları Sil</button>
     </div>
   </div>
 </div>
 
 <!-- CELL MODAL -->
-<div class="modal-overlay" id="cellOverlay">
-  <div class="cell-modal">
+<div class="moverlay" id="cellOverlay">
+  <div class="cmodal">
     <h3>Durum Seç</h3>
-    <div class="cmodal-info" id="cellModalInfo"></div>
-    <div id="plakaSection" class="plaka-section" style="display:none;">
-      <label>🚗 Plaka</label>
-      <input type="text" class="plaka-input" id="plakaInput" placeholder="34 ABC 123" maxlength="12">
-      <div class="plaka-hint">İsteğe bağlı — boş bırakabilirsiniz</div>
+    <div class="cinfo" id="cInfo"></div>
+    <div id="plakSec" class="plaksec" style="display:none;"><label>[P] Plaka</label><input class="plakinput" id="plakInput" placeholder="34 ABC 123" maxlength="12"><div style="font-size:10px;color:#888;margin-top:3px;">İsteğe bağlı</div></div>
+    <div class="sopts" id="sOpts"></div>
+    <button class="mcancel" onclick="closeCellM()">X İptal</button>
+  </div>
+</div>
+
+
+<!-- RAPOR MODAL -->
+<div class="moverlay" id="raporOverlay">
+  <div class="smodal" style="max-width:680px;">
+    <div class="mhead" style="border-radius:14px 14px 0 0;">
+      <div style="font-size:16px;font-weight:700;color:#fff;">RAPOR & ANALIZ</div>
+      <button class="mclose" onclick="closeRapor()">X</button>
     </div>
-    <div class="status-options" id="statusOptions"></div>
-    <button class="modal-cancel" onclick="closeCellModal()">✕ İptal</button>
+    <div style="padding:14px;">
+      <!-- Dönem seçimi -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+        <select id="raporTip" onchange="renderRapor()" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+          <option value="hafta">Bu Hafta</option>
+          <option value="ay">Bu Ay</option>
+          <option value="ozel">Özel Aralık</option>
+        </select>
+        <div id="ozelAralik" style="display:none;gap:6px;align-items:center;display:none;">
+          <input type="date" id="raporBas" style="padding:5px 8px;border-radius:6px;border:1px solid #ccc;font-size:12px;">
+          <span style="font-size:12px;color:#888;">-</span>
+          <input type="date" id="raporBit" style="padding:5px 8px;border-radius:6px;border:1px solid #ccc;font-size:12px;">
+          <button onclick="renderRapor()" style="padding:5px 12px;border-radius:6px;border:none;background:#1a3a5c;color:#fff;font-size:12px;cursor:pointer;">Getir</button>
+        </div>
+      </div>
+      <!-- Özet kartlar -->
+      <div id="raporOzet" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:16px;"></div>
+      <!-- Danışman tablosu -->
+      <div style="font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #eee;">DANIŞMAN BAZLI ÖZET</div>
+      <div style="overflow-x:auto;">
+        <table id="raporTablo" style="width:100%;border-collapse:collapse;font-size:12px;"></table>
+      </div>
+      <!-- Gelmeme uyarıları -->
+      <div style="margin-top:16px;">
+        <div style="font-size:12px;font-weight:700;color:#c0392b;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #fde8e8;">TEKRAR GELMEYEN PLAKALAR (2+ kez)</div>
+        <div id="plakaUyari" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- SETTINGS MODAL -->
-<div class="modal-overlay" id="settingsOverlay">
-  <div class="settings-modal">
-    <div class="modal-header" style="border-radius:14px 14px 0 0;">
-      <div style="font-size:18px;">⚙️</div>
-      <div><h3 style="font-size:14px;">Ayarlar</h3></div>
-      <button class="modal-close" onclick="closeSettings()">✕</button>
+<div class="moverlay" id="settOverlay">
+  <div class="smodal">
+    <div class="mhead" style="border-radius:14px 14px 0 0;"><div style="font-size:18px;"></div><div><h3 style="font-size:14px;">Ayarlar</h3></div><button class="mclose" onclick="closeSett()">X</button></div>
+    <div class="stabs">
+      <button class="stab active" onclick="swTab('advisors')">Danismanlar</button>
+      <button class="stab" onclick="swTab('users')">Kullanicilar</button>
     </div>
-    <div class="settings-tabs">
-      <button class="stab active" onclick="switchTab('advisors')">👥 Danışmanlar</button>
-      <button class="stab" onclick="switchTab('sync')">🔄 Senkronizasyon</button>
-    </div>
-    <div class="stab-body">
-      <div class="stab-content active" id="tab-advisors">
-        <div class="adv-list" id="advList"></div>
-        <div class="add-adv-form">
-          <label>Yeni Danışman Ekle</label>
-          <input type="text" id="newAdvName" placeholder="Ad Soyad" onkeydown="if(event.key==='Enter')addAdvisor()">
-          <button class="add-adv-btn" onclick="addAdvisor()">+ Ekle</button>
-        </div>
+    <div class="sbody">
+      <div class="scont active" id="tab-advisors">
+        <div class="advlist" id="advListEl"></div>
+        <div class="addform"><label>Yeni Danışman Ekle</label><input type="text" id="newAdvN" placeholder="Ad Soyad" onkeydown="if(event.key==='Enter')addAdv()"><button class="addbtn" onclick="addAdv()">+ Ekle</button></div>
       </div>
-      <div class="stab-content" id="tab-sync">
-        <div id="syncStatusBox" class="sync-status-box ok">
-          ✅ Senkronizasyon aktif!<br>
-          <span style="font-size:11px;color:#555;">Sunucu: <b>https://randevu.odakpaz8.workers.dev</b></span><br>
-          <span style="font-size:11px;color:#555;">Her cihazda otomatik bağlanır, ayar gerekmez.</span>
+      <div class="scont" id="tab-users">
+        <div style="font-size:12px;color:#555;margin-bottom:12px;line-height:1.8;background:#f0f7ff;padding:10px;border-radius:8px;">
+          <b>Giriş Bilgileri:</b><br>
+          Danışmanlar kendi adlarıyla giriş yapar.<br>
+          Varsayılan şifre: <b>1234</b> (kendi portallarından değiştirebilirler)<br>
+          Yönetici: <b>admin</b> / <b>Odak2026</b>
         </div>
+        <div id="uListEl" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- EDIT NAME MODAL -->
-<div class="modal-overlay" id="editOverlay">
-  <div class="edit-modal">
-    <h3>Danışman Düzenle</h3>
-    <input type="text" id="editAdvName" placeholder="Ad Soyad">
-    <button class="edit-save-btn" onclick="saveEditAdvisor()">💾 Kaydet</button>
-    <button class="modal-cancel" onclick="closeEdit()">İptal</button>
-  </div>
+<!-- EDIT MODAL -->
+<div class="moverlay" id="editOverlay">
+  <div class="emodal"><h3>Danışman Düzenle</h3><input type="text" id="editN"><button class="esavebtn" onclick="saveEdit()">Kaydet</button><button class="mcancel" onclick="closeEdit()">İptal</button></div>
 </div>
 
-<input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+<!-- TV -->
+<div id="tvOverlay">
+  <div id="tvBar">
+    <div style="color:#fff;font-size:20px;font-weight:700;letter-spacing:2px;">RANDEVU PLANLAMA PANOSU</div>
+    <div id="tvClock" style="color:#f39c12;font-size:26px;font-weight:700;font-family:monospace;"></div>
+    <div id="tvDate" style="color:#aed6f1;font-size:16px;font-weight:600;"></div>
+    <button onclick="closeTV()" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:7px 16px;border-radius:8px;font-size:13px;cursor:pointer;">X Kapat</button>
+  </div>
+  <div id="tvContent"></div>
+  <div id="tvLegend"></div>
+</div>
+
+<input type="file" id="photoFI" accept="image/*" style="display:none" onchange="handlePhoto(event)">
 
 <script>
-const STATUSES = [
-  { code:'M',  label:'Müşteriyle Görüşme Devam',                 color:'#27ae60', plaka:true,  sayma:true  },
-  { code:'T',  label:'Teslimat Yapıyor',                          color:'#2980b9', plaka:false, sayma:false },
-  { code:'Y',  label:'Yemek Paydosunda Afiyet Olsun',            color:'#f39c12', plaka:false, sayma:false },
-  { code:'!',  label:'İzinli',                                    color:'#e74c3c', plaka:false, sayma:false },
-  { code:'A',  label:'Anket Araması Yapıyor',                     color:'#8e44ad', plaka:false, sayma:false },
-  { code:'R',  label:'Randevu GELDİ Bekliyor',                   color:'#16a085', plaka:true,  sayma:true  },
-  { code:'D',  label:'Müşteriyle DRP8 için 30 Dakika Planlandı',  color:'#d35400', plaka:true,  sayma:false },
-  { code:'!!', label:'Randevusuna Geçgeç',                       color:'#c0392b', plaka:false, sayma:false },
-  { code:'X',  label:'Randevusuna Gelmedi',                      color:'#7f8c8d', plaka:true,  sayma:false },
+const W='https://randevu.odakpaz8.workers.dev';
+const ST=[
+  {code:'M', label:'Müşteriyle Görüşme Devam',                color:'#27ae60',plaka:true, sayma:true},
+  {code:'T', label:'Teslimat Yapıyor',                         color:'#2980b9',plaka:false,sayma:false},
+  {code:'Y', label:'Yemek Paydosunda Afiyet Olsun',           color:'#f39c12',plaka:false,sayma:false},
+  {code:'!', label:'İzinli',                                   color:'#e74c3c',plaka:false,sayma:false},
+  {code:'A', label:'Anket Araması Yapıyor',                    color:'#8e44ad',plaka:false,sayma:false},
+  {code:'R', label:'Randevu GELDİ Bekliyor',                  color:'#16a085',plaka:true, sayma:true},
+  {code:'D', label:'Müşteriyle DRP8 için 30 Dakika Planlandı', color:'#d35400',plaka:true, sayma:false},
+  {code:'!!',label:'Randevusuna Geçgeç',                      color:'#c0392b',plaka:false,sayma:false},
+  {code:'X', label:'Randevusuna Gelmedi',                     color:'#7f8c8d',plaka:true, sayma:false},
 ];
-const IZIN_STATUS  = { code:'!', label:'İzinli',                        color:'#e74c3c', plaka:'', sayma:false };
-const YEMEK_STATUS = { code:'Y', label:'Yemek Paydosunda Afiyet Olsun', color:'#f39c12', plaka:'', sayma:false };
+const IZ={code:'!',label:'İzinli',color:'#e74c3c',plaka:'',sayma:false};
+const YM={code:'Y',label:'Yemek Paydosunda Afiyet Olsun',color:'#f39c12',plaka:'',sayma:false};
+const TM=[];
+for(let h=8;h<=18;h++)for(let m=0;m<60;m+=10){if(h==8&&m<30)continue;if(h==18&&m>0)break;TM.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);}
+const UMAP=['berk','erdem','erkut','furkan','gonca','mustafa','tarik','ramazan','nisanur','yalcin','yunuscan'];
 
-const TIMES = [];
-for(let h=8;h<=18;h++){
-  for(let m=0;m<60;m+=10){
-    if(h===8&&m<30)continue;
-    if(h===18&&m>0)break;
-    TIMES.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+let advisors,photos,cells={},curDate='',curAdvIdx=null,editIdx=null,photoIdx=null;
+let token=null,role=null,advIdx=null,uname=null;
+let syncT=null,lastH='',tvT=null;
+
+function gi(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function fmtDate(s){if(!s)return'';const[y,m,d]=s.split('-');return `${d}.${m}.${y}`;}
+
+function initAdv(){
+  try{advisors=JSON.parse(localStorage.getItem('adv2'))||null;}catch(e){advisors=null;}
+  advisors=advisors||['Berk ÇALAP','Erdem ALBAYRAK','Erkut DİKEÇ','Furkan ÜNLÜ','Gonca SARI','Mustafa ÜNLÜ','Tarık TUNÇ','Ramazan ALAGEYİK','Nisanur SOY','Yalçın SEDEFOĞLU','Yunuscan YÜCE'];
+  try{photos=JSON.parse(localStorage.getItem('advPh'))||{};}catch(e){photos={};}
+}
+
+async function api(path,opts={}){
+  return fetch(`${W}${path}`,{...opts,headers:{'Content-Type':'application/json','X-Token':token,...(opts.headers||{})}});
+}
+
+// LOGIN
+async function doLogin(){
+  const u=document.getElementById('luser').value.trim(),p=document.getElementById('lpass').value;
+  const e=document.getElementById('lerr'); e.style.display='none';
+  if(!u||!p){e.textContent='Kullanıcı adı ve şifre giriniz.';e.style.display='block';return;}
+  try{
+    const r=await fetch(`${W}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(!r.ok){e.textContent=d.error||'Hata';e.style.display='block';return;}
+    token=d.token;role=d.role;advIdx=d.advisorIdx;uname=d.username;
+    localStorage.setItem('at',token);localStorage.setItem('ar',role);localStorage.setItem('ai',JSON.stringify(advIdx));localStorage.setItem('au',uname);
+    document.getElementById('lpass').value='';
+    afterLogin();
+  }catch(ex){e.textContent='Sunucuya bağlanılamadı!';e.style.display='block';}
+}
+
+function afterLogin(){
+  document.getElementById('loginScreen').style.display='none';
+  initAdv();
+  if(role==='admin'){
+    document.getElementById('adminScreen').style.display='block';
+    document.getElementById('uBadge').textContent=`${uname}`;
+    curDate=today();document.getElementById('dateInput').value=curDate;
+    buildTable();buildLegend();fetchAll();startPoll();startOtoKontrol();
+  } else {
+    document.getElementById('advScreen').style.display='flex';
+    document.getElementById('advBadge').textContent=`${advisors[advIdx]||uname}`;
+    document.getElementById('advDate').value=today();curDate=today();
+    loadAdvPlan();startAdvPoll();
   }
 }
 
-let advisors;
-try { advisors = JSON.parse(localStorage.getItem('advisors2')) || null; } catch(e) { advisors = null; }
-advisors = advisors || ['Berk ÇALAP','Erdem ALBAYRAK','Erkut DİKEÇ','Furkan ÜNLÜ','Gonca SARI','Mustafa ÜNLÜ','Tarık TUNÇ','Ramazan ALAGEYİK','Nisanur SOY','Yalçın SEDEFOĞLU','Yunuscan YÜCE'];
-let advisorPhotos;
-try { advisorPhotos = JSON.parse(localStorage.getItem('advisorPhotos')) || {}; } catch(e) { advisorPhotos = {}; }
-let allData={}, currentDate='', cells={};
-let currentAdvisorIdx=null, editingAdvisorIdx=null, photoTargetIdx=null;
-let workerUrl = 'https://randevu.odakpaz8.workers.dev'; // Tüm cihazlarda otomatik bağlanır
-let syncTimer = null;
-let lastSyncedHash = '';
-
-
-// ===== SYNC =====
-function setSyncStatus(s,t){
-  document.getElementById('syncDot').className='sync-dot '+s;
-  document.getElementById('syncText').textContent=t;
+function doLogout(){
+  token=null;role=null;advIdx=null;
+  localStorage.removeItem('at');localStorage.removeItem('ar');localStorage.removeItem('ai');localStorage.removeItem('au');
+  if(syncT)clearInterval(syncT);if(tvT)clearInterval(tvT);
+  document.getElementById('adminScreen').style.display='none';
+  document.getElementById('advScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('luser').value='';document.getElementById('lpass').value='';
 }
 
-async function fetchFromWorker() {
-  if(!workerUrl) return;
-  try {
-    setSyncStatus('wait','Yükleniyor...');
-    const [dataRes, metaRes] = await Promise.all([
-      fetch(`${workerUrl}/data?date=${currentDate}`),
-      fetch(`${workerUrl}/meta`)
-    ]);
-    const dataJson = await dataRes.json();
-    const metaJson = await metaRes.json();
-    cells = dataJson.cells || {};
-    if(metaJson.advisors) { advisors = metaJson.advisors; saveAdvisorsLocal(); }
-    if(metaJson.photos)   { advisorPhotos = metaJson.photos; saveAdvisorsLocal(); }
-    renderCells(); rebuildTable();
-    setSyncStatus('ok','Bağlı ✓');
-    document.getElementById('syncStatusBox').className='sync-status-box ok';
-    try{document.getElementById('syncStatusBox').textContent='✓ Bağlantı aktif!';}catch(e){}
-  } catch(e) {
-    setSyncStatus('err','Bağlantı hatası');
-  }
+function restore(){const t=localStorage.getItem('at'),r=localStorage.getItem('ar'),i=localStorage.getItem('ai'),u=localStorage.getItem('au');if(t&&r){token=t;role=r;advIdx=i?JSON.parse(i):null;uname=u;afterLogin();}}
+
+// FETCH
+async function fetchAll(){
+  try{
+    const r=await api(`/data?date=${curDate}`);
+    if(r.status===401){doLogout();return;}
+    const d=await r.json();cells=d.cells||{};lastH=JSON.stringify(cells);renderCells();
+    const mr=await api('/meta');const md=await mr.json();
+    if(md.advisors){advisors=md.advisors;localStorage.setItem('adv2',JSON.stringify(advisors));}
+    if(md.photos){photos=md.photos;localStorage.setItem('advPh',JSON.stringify(photos));}
+    rebuildTable();
+  }catch(ex){}
 }
+async function pushData(){try{await api('/data',{method:'POST',body:JSON.stringify({date:curDate,cells,fullReplace:true})});}catch(ex){}}
+async function pushMeta(){try{await api('/meta',{method:'POST',body:JSON.stringify({advisors,photos})});}catch(ex){}}
+function startPoll(){if(syncT)clearInterval(syncT);syncT=setInterval(async()=>{try{const r=await api(`/data?date=${curDate}`);if(r.status===401){doLogout();return;}const d=await r.json();const h=JSON.stringify(d.cells||{});if(h!==lastH){lastH=h;cells=d.cells||{};renderCells();}}catch(ex){}},10000);}
+function startAdvPoll(){if(syncT)clearInterval(syncT);syncT=setInterval(()=>loadAdvPlan(true),15000);}
 
-async function pushToWorker() {
-  if(!workerUrl) return;
-  try {
-    await fetch(`${workerUrl}/data`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({date:currentDate, cells}) });
-  } catch(e) {}
-}
+// DATE
+window.onDateChange=function(){const nd=document.getElementById('dateInput').value;if(!nd)return;curDate=nd;cells={};renderCells();fetchAll();}
 
-async function pushMetaToWorker() {
-  if(!workerUrl) return;
-  try {
-    await fetch(`${workerUrl}/meta`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({advisors, photos: advisorPhotos}) });
-  } catch(e) {}
-}
-
-// Poll every 10 seconds for real-time feel
-function startPolling() {
-  if(syncTimer) clearInterval(syncTimer);
-  if(!workerUrl) return;
-  syncTimer = setInterval(async ()=>{
-    try {
-      const res = await fetch(`${workerUrl}/data?date=${currentDate}`);
-      const json = await res.json();
-      const h = JSON.stringify(json.cells||{});
-      if(h !== lastSyncedHash) {
-        lastSyncedHash = h;
-        cells = json.cells||{};
-        renderCells();
-      }
-      setSyncStatus('ok','Bağlı ✓');
-    } catch(e) { setSyncStatus('err','Bağlantı hatası'); }
-  }, 10000);
-}
-
-window.saveWorkerUrl = async function() {
-  // URL koda gömülü, ayar gerekmez
-  await fetchFromWorker();
-  startPolling();
-}
-
-// ===== STORAGE =====
-function saveAdvisorsLocal(){ localStorage.setItem('advisors2',JSON.stringify(advisors)); localStorage.setItem('advisorPhotos',JSON.stringify(advisorPhotos)); }
-function saveDay(){ localStorage.setItem('localDay_'+currentDate, JSON.stringify(cells)); pushToWorker(); lastSyncedHash=JSON.stringify(cells); }
-function loadDay(date){ try{const s=localStorage.getItem('localDay_'+date);cells=s?JSON.parse(s):{};}catch(e){cells={};} }
-
-// ===== HELPERS =====
-function getInitials(n){ return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
-function todayStr(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-function formatDateTR(s){ if(!s)return''; const[y,m,d]=s.split('-'); return `${d}.${m}.${y}`; }
-
-function initDate(){
-  currentDate=todayStr();
-  document.getElementById('dateInput').value=currentDate;
-  loadDay(currentDate);
-  if(workerUrl){ fetchFromWorker(); startPolling(); }
-  else setSyncStatus('err','Senkronizasyon kurulmadı');
-}
-
-window.onDateChange = function(){
-  const nd=document.getElementById('dateInput').value; if(!nd)return;
-  saveDay(); currentDate=nd; loadDay(currentDate);
-  if(workerUrl) fetchFromWorker(); else renderCells();
-}
-
-// ===== TABLE =====
+// TABLE
 function buildTable(){
-  const head=document.getElementById('tableHead'), body=document.getElementById('tableBody');
-  head.innerHTML=''; body.innerHTML='';
+  const head=document.getElementById('tHead'),body=document.getElementById('tBody');
+  head.innerHTML='';body.innerHTML='';
   const tr=document.createElement('tr');
-  const th0=document.createElement('th');
-  th0.style.cssText='background:#1a3a5c;color:#fff;font-size:11px;padding:6px 4px;width:56px;position:sticky;top:0;z-index:11;';
-  th0.textContent='Saat'; tr.appendChild(th0);
-  advisors.forEach((name,ai)=>{
-    const th=document.createElement('th'); th.className='header-advisor';
-    const photo=advisorPhotos[ai];
-    const av=photo?`<img src="${photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;margin:0 auto 3px;display:block;border:2px solid #fff;">`:`<div class="avatar-circle">${getInitials(name)}</div>`;
-    th.innerHTML=`${av}<div style="font-size:10px;margin-bottom:2px;">${name}</div><div class="count-badge" id="count-${ai}">0</div><div class="click-hint">⚙ Toplu işlem</div>`;
-    th.addEventListener('click',()=>openAdvisorPanel(ai)); tr.appendChild(th);
+  const th0=document.createElement('th');th0.style.cssText='background:#1a3a5c;color:#fff;font-size:11px;padding:6px 4px;width:56px;position:sticky;top:0;z-index:11;';th0.textContent='Saat';tr.appendChild(th0);
+  advisors.forEach((nm,ai)=>{
+    const th=document.createElement('th');th.className='hadv';
+    const ph=photos[ai];const av=ph?`<img src="${ph}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;margin:0 auto 3px;display:block;border:2px solid #fff;">`:`<div class="avc">${gi(nm)}</div>`;
+    th.innerHTML=`${av}<div style="font-size:10px;margin-bottom:2px;">${nm}</div><div class="cbadge" id="cnt-${ai}">0</div><div class="hint"> Toplu işlem</div>`;
+    th.addEventListener('click',()=>openAdvPanel(ai));tr.appendChild(th);
   });
-  const thW=document.createElement('th'); thW.className='header-walkin';
-  thW.innerHTML=`<div class="avatar-circle walkin" style="font-size:16px;">?</div><div style="font-size:10px;margin-bottom:3px;">Randevusuz Gelen</div><div class="count-badge" id="count-walkin">0</div>`;
-  tr.appendChild(thW); head.appendChild(tr);
-  TIMES.forEach(t=>{
-    const isHour=t.endsWith(':00'), row=document.createElement('tr');
-    const tdT=document.createElement('td'); tdT.className='time-col'+(isHour?' hour':''); tdT.textContent=t; row.appendChild(tdT);
-    advisors.forEach((_,ai)=>{
-      const td=document.createElement('td'); td.className='cell'+(isHour?' hour-row':''); td.id=`c||${ai}||${t}`;
-      td.addEventListener('click',()=>openCellModal(ai,t)); row.appendChild(td);
-    });
-    const tdW=document.createElement('td'); tdW.className='cell walkin-cell'+(isHour?' hour-row':''); tdW.id=`c||walkin||${t}`;
-    tdW.addEventListener('click',()=>openCellModal('walkin',t)); row.appendChild(tdW);
+  const thW=document.createElement('th');thW.className='hwal';thW.innerHTML=`<div class="avc w" style="font-size:16px;">?</div><div style="font-size:10px;margin-bottom:3px;">Randevusuz<br>Gelen</div><div class="cbadge" id="cnt-walkin">0</div>`;tr.appendChild(thW);head.appendChild(tr);
+  TM.forEach(t=>{
+    const ih=t.endsWith(':00'),row=document.createElement('tr');
+    const td0=document.createElement('td');td0.className='tcol'+(ih?' h':'');td0.textContent=t;row.appendChild(td0);
+    advisors.forEach((_,ai)=>{const td=document.createElement('td');td.className='cell'+(ih?' hr':'');td.id=`c|${ai}|${t}`;td.addEventListener('click',()=>openCell(ai,t));row.appendChild(td);});
+    const tw=document.createElement('td');tw.className='cell wc'+(ih?' hr':'');tw.id=`c|w|${t}`;tw.addEventListener('click',()=>openCell('w',t));row.appendChild(tw);
     body.appendChild(row);
   });
 }
-function rebuildTable(){ buildTable(); renderCells(); updateCounts(); }
+function rebuildTable(){buildTable();renderCells();updCounts();}
 
-// ===== RENDER =====
-function renderCells(){
-  document.querySelectorAll('.cell').forEach(el=>{ el.style.background=''; el.style.color=''; el.textContent=''; el.style.fontSize=''; });
-  Object.entries(cells).forEach(([key,status])=>applyCellStyle(key,status));
-  updateCounts();
-}
-function applyCellStyle(key,status){
-  const[ai,t]=key.split('||'), el=document.getElementById(`c||${ai}||${t}`); if(!el)return;
-  el.style.background=status.color; el.style.color='#fff';
-  el.textContent=status.plaka?status.plaka:status.code;
-  el.style.fontSize=status.plaka?'11px':'12px';
-}
-function updateCounts(){
-  advisors.forEach((_,ai)=>{
-    const cnt=Object.entries(cells).filter(([k,v])=>k.startsWith(`${ai}||`)&&v.sayma).length;
-    const el=document.getElementById(`count-${ai}`); if(el)el.textContent=cnt;
-  });
-  const wCnt=Object.entries(cells).filter(([k,v])=>k.startsWith('walkin||')&&v.sayma).length;
-  const wEl=document.getElementById('count-walkin'); if(wEl)wEl.textContent=wCnt;
-  document.getElementById('totalBadge').textContent=`Randevu: ${Object.entries(cells).filter(([,v])=>v.sayma).length}`;
-}
+// RENDER
+function renderCells(){document.querySelectorAll('.cell').forEach(el=>{el.style.background='';el.style.color='';el.textContent='';el.style.fontSize='';});Object.entries(cells).forEach(([k,s])=>applyCell(k,s));updCounts();}
+function applyCell(key,s){const[ai,t]=key.split('|').slice(0,2).concat([key.split('|')[2]]);const id=`c|${key.split('|')[1]}|${key.split('|')[2]}`;const el=document.getElementById(id);if(!el)return;el.style.background=s.color;el.style.color='#fff';el.textContent=s.plaka?s.plaka:s.code;el.style.fontSize=s.plaka?'11px':'12px';}
+function updCounts(){advisors.forEach((_,ai)=>{const c=Object.entries(cells).filter(([k,v])=>k.startsWith(`|${ai}|`)&&v.sayma).length;const el=document.getElementById(`cnt-${ai}`);if(el)el.textContent=c;});const wc=Object.entries(cells).filter(([k,v])=>k.startsWith('|w|')&&v.sayma).length;const we=document.getElementById('cnt-walkin');if(we)we.textContent=wc;document.getElementById('totBadge').textContent=`Randevu: ${Object.entries(cells).filter(([,v])=>v.sayma).length}`;}
 
-// ===== PAGE SWITCH =====
-window.showPage = function(page){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  document.getElementById('btnDashboard').style.display=page==='dashboard'?'none':'';
-  document.getElementById('btnPano').style.display=page==='dashboard'?'':'none';
-  if(page==='dashboard'){ document.getElementById('dashDate').value=currentDate; renderDashboard(); }
-}
+// PAGE
+window.showPage=function(pg){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+pg).classList.add('active');document.getElementById('btnDash').style.display=pg==='dashboard'?'none':'';document.getElementById('btnPano').style.display=pg==='dashboard'?'':'none';if(pg==='dashboard'){document.getElementById('dashDate').value=curDate;renderDash();}}
 
-// ===== DASHBOARD =====
-window.renderDashboard = function(){
-  const date=document.getElementById('dashDate').value||currentDate;
-  let dayData={};
-  try{ const s=localStorage.getItem('localDay_'+date); dayData=s?JSON.parse(s):{}; }catch(e){}
-  // if worker: fetch async
-  if(workerUrl){
-    fetch(`${workerUrl}/data?date=${date}`).then(r=>r.json()).then(j=>{
-      dayData=j.cells||{}; _renderDash(date,dayData);
-    }).catch(()=>_renderDash(date,dayData));
-  } else { _renderDash(date,dayData); }
-}
-
-function _renderDash(date,dayData){
-  const geldi   =Object.values(dayData).filter(v=>v.code==='R').length;
-  const gorusme =Object.values(dayData).filter(v=>v.code==='M').length;
-  const gelmedi =Object.values(dayData).filter(v=>v.code==='X').length;
-  const gecgec  =Object.values(dayData).filter(v=>v.code==='!!').length;
-  const izinli  =advisors.filter((_,ai)=>TIMES.every(t=>{ const c=dayData[`${ai}||${t}`]; return c&&c.code==='!'; })).length;
-  document.getElementById('dashStatCards').innerHTML=`
-    <div class="stat-card" style="border-color:#16a085;"><div class="sc-num" style="color:#16a085;">${geldi}</div><div class="sc-lbl">Randevu Geldi</div></div>
-    <div class="stat-card" style="border-color:#27ae60;"><div class="sc-num" style="color:#27ae60;">${gorusme}</div><div class="sc-lbl">Görüşme Devam</div></div>
-    <div class="stat-card" style="border-color:#7f8c8d;"><div class="sc-num" style="color:#7f8c8d;">${gelmedi}</div><div class="sc-lbl">Gelmedi</div></div>
-    <div class="stat-card" style="border-color:#c0392b;"><div class="sc-num" style="color:#c0392b;">${gecgec}</div><div class="sc-lbl">Geçgeç</div></div>
-    <div class="stat-card" style="border-color:#e74c3c;"><div class="sc-num" style="color:#e74c3c;">${izinli}</div><div class="sc-lbl">İzinli Danışman</div></div>`;
-  const grid=document.getElementById('dashAdvGrid'); grid.innerHTML='';
-  advisors.forEach((name,ai)=>{
-    const ac=Object.entries(dayData).filter(([k])=>k.startsWith(`${ai}||`));
-    const aGeldi=ac.filter(([,v])=>v.code==='R').length;
-    const aGor  =ac.filter(([,v])=>v.code==='M').length;
-    const aGel  =ac.filter(([,v])=>v.code==='X').length;
-    const aIzin =TIMES.every(t=>{ const c=dayData[`${ai}||${t}`]; return c&&c.code==='!'; });
-    const plakalar=ac.filter(([,v])=>v.sayma&&v.plaka).map(([,v])=>v.plaka);
-    const gelPl   =ac.filter(([,v])=>v.code==='X'&&v.plaka).map(([,v])=>v.plaka);
-    const photo=advisorPhotos[ai];
-    const av=photo?`<img src="${photo}">`:`<span>${getInitials(name)}</span>`;
-    const sl=aIzin?'<span style="color:#e74c3c;font-weight:600;">İzinli</span>':`<span>${aGeldi} geldi · ${aGor} görüşme</span>`;
-    const card=document.createElement('div'); card.className='adv-dash-card';
-    card.innerHTML=`<div class="adv-dash-header"><div class="adv-dash-av">${av}</div><div><div class="adv-dash-name">${name}</div><div class="adv-dash-status">${sl}</div></div></div>
-      <div class="adv-stat-row"><span>Randevu Geldi</span><span>${aGeldi}</span></div>
-      <div class="adv-stat-row"><span>Görüşme</span><span>${aGor}</span></div>
-      <div class="adv-stat-row"><span>Gelmedi</span><span style="color:#7f8c8d;">${aGel}</span></div>
-      ${plakalar.length?`<div class="adv-plaka-list"><div class="adv-plaka-title">Plakalı Randevular</div>${plakalar.map(p=>`<span class="plaka-chip">${p}</span>`).join('')}</div>`:''}
-      ${gelPl.length?`<div class="adv-plaka-list"><div class="adv-plaka-title" style="color:#c0392b;">Gelmedi</div>${gelPl.map(p=>`<span class="plaka-chip gelmedi">${p}</span>`).join('')}</div>`:''}`;
+// DASHBOARD
+window.renderDash=function(){const dt=document.getElementById('dashDate').value||curDate;api(`/data?date=${dt}`).then(r=>r.json()).then(d=>_dash(d.cells||{})).catch(()=>_dash(cells));}
+function _dash(dd){
+  const gld=Object.values(dd).filter(v=>v.code==='R').length,gor=Object.values(dd).filter(v=>v.code==='M').length,gel=Object.values(dd).filter(v=>v.code==='X').length,gec=Object.values(dd).filter(v=>v.code==='!!').length,izin=advisors.filter((_,ai)=>TM.every(t=>{const c=dd[`|${ai}|${t}`];return c&&c.code==='!';})).length;
+  document.getElementById('statCards').innerHTML=`<div class="scard" style="border-color:#16a085;"><div class="n" style="color:#16a085;">${gld}</div><div class="l">Randevu Geldi</div></div><div class="scard" style="border-color:#27ae60;"><div class="n" style="color:#27ae60;">${gor}</div><div class="l">Görüşme</div></div><div class="scard" style="border-color:#7f8c8d;"><div class="n" style="color:#7f8c8d;">${gel}</div><div class="l">Gelmedi</div></div><div class="scard" style="border-color:#c0392b;"><div class="n" style="color:#c0392b;">${gec}</div><div class="l">Geçgeç</div></div><div class="scard" style="border-color:#e74c3c;"><div class="n" style="color:#e74c3c;">${izin}</div><div class="l">İzinli</div></div>`;
+  const grid=document.getElementById('advGrid');grid.innerHTML='';
+  advisors.forEach((nm,ai)=>{
+    const ac=Object.entries(dd).filter(([k])=>k.includes(`|${ai}|`));
+    const aR=ac.filter(([,v])=>v.code==='R').length,aM=ac.filter(([,v])=>v.code==='M').length,aX=ac.filter(([,v])=>v.code==='X').length;
+    const aIz=TM.every(t=>{const c=dd[`|${ai}|${t}`];return c&&c.code==='!';});
+    const pl=ac.filter(([,v])=>v.sayma&&v.plaka).map(([,v])=>v.plaka);
+    const gpl=ac.filter(([,v])=>v.code==='X'&&v.plaka).map(([,v])=>v.plaka);
+    const ph=photos[ai];const av=ph?`<img src="${ph}">`:`<span>${gi(nm)}</span>`;
+    const sl=aIz?'<span style="color:#e74c3c;font-weight:600;">İzinli</span>':`<span>${aR} geldi · ${aM} görüşme</span>`;
+    const card=document.createElement('div');card.className='acard';
+    card.innerHTML=`<div class="ahead"><div class="aav">${av}</div><div><div class="aname">${nm}</div><div class="astat">${sl}</div></div></div><div class="srow"><span>Randevu Geldi</span><span>${aR}</span></div><div class="srow"><span>Görüşme</span><span>${aM}</span></div><div class="srow"><span>Gelmedi</span><span style="color:#7f8c8d;">${aX}</span></div>${pl.length?`<div class="pllist"><div class="pltitle">Plakalı</div>${pl.map(p=>`<span class="pchip">${p}</span>`).join('')}</div>`:''}${gpl.length?`<div class="pllist"><div class="pltitle" style="color:#c0392b;">Gelmedi</div>${gpl.map(p=>`<span class="pchip g">${p}</span>`).join('')}</div>`:''}`;
     grid.appendChild(card);
   });
-  const tbody=document.getElementById('gelmediBody'); tbody.innerHTML='';
-  Object.entries(dayData).filter(([,v])=>v.code==='X').forEach(([key,v])=>{
-    const[ai,t]=key.split('||'), name=ai==='walkin'?'Randevusuz Gelen':(advisors[parseInt(ai)]||'?');
-    const tr=document.createElement('tr'); tr.innerHTML=`<td>${name}</td><td>${t}</td><td style="font-weight:700;letter-spacing:1px;">${v.plaka||'—'}</td>`; tbody.appendChild(tr);
-  });
-  if(!tbody.children.length) tbody.innerHTML='<tr><td colspan="3" style="text-align:center;color:#aaa;padding:12px;">Kayıt yok</td></tr>';
+  const tb=document.getElementById('gelBody');tb.innerHTML='';
+  Object.entries(dd).filter(([,v])=>v.code==='X').forEach(([key,v])=>{const parts=key.split('|');const nm=parts[1]==='w'?'Randevusuz Gelen':(advisors[parseInt(parts[1])]||'?');const tr=document.createElement('tr');tr.innerHTML=`<td>${nm}</td><td>${parts[2]}</td><td style="font-weight:700;letter-spacing:1px;">${v.plaka||'—'}</td>`;tb.appendChild(tr);});
+  if(!tb.children.length)tb.innerHTML='<tr><td colspan="3" style="text-align:center;color:#aaa;padding:12px;">Kayıt yok</td></tr>';
 }
 
-// ===== ADVISOR PANEL =====
-function openAdvisorPanel(ai){
-  currentAdvisorIdx=ai;
-  const av=document.getElementById('apAvatar');
-  av.innerHTML=advisorPhotos[ai]?`<img src="${advisorPhotos[ai]}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">`:`${getInitials(advisors[ai])}`;
-  document.getElementById('apName').textContent=advisors[ai];
-  document.getElementById('apDate').textContent=formatDateTR(currentDate);
-  refreshAllDayCheck();
-  document.getElementById('izinExpand').classList.remove('open');
-  document.getElementById('yemekExpand').classList.remove('open');
-  fillTimeSelects();
-  document.getElementById('advisorOverlay').classList.add('open');
+// ADV PANEL
+function openAdvPanel(ai){
+  curAdvIdx=ai;
+  const av=document.getElementById('apAv');av.innerHTML=photos[ai]?`<img src="${photos[ai]}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">`:`${gi(advisors[ai])}`;
+  document.getElementById('apNm').textContent=advisors[ai];document.getElementById('apDt').textContent=fmtDate(curDate);
+  refreshIzin();document.getElementById('izExp').classList.remove('open');document.getElementById('ymExp').classList.remove('open');
+  fillSels();document.getElementById('advOverlay').classList.add('open');
 }
-window.closeAdvisorPanel=function(){ document.getElementById('advisorOverlay').classList.remove('open'); currentAdvisorIdx=null; }
-function refreshAllDayCheck(){
-  const isIzinli=TIMES.every(t=>{ const c=cells[`${currentAdvisorIdx}||${t}`]; return c&&c.code==='!'; });
-  document.getElementById('allDayIzinCard').className='bulk-card'+(isIzinli?' active':'');
-  document.getElementById('allDayCheck').style.display=isIzinli?'block':'none';
-}
-window.toggleAllDayIzin=function(){
-  const ai=currentAdvisorIdx, isIzinli=TIMES.every(t=>{ const c=cells[`${ai}||${t}`]; return c&&c.code==='!'; });
-  if(isIzinli){ TIMES.forEach(t=>{ if(cells[`${ai}||${t}`]?.code==='!')delete cells[`${ai}||${t}`]; }); }
-  else { TIMES.forEach(t=>{ cells[`${ai}||${t}`]={...IZIN_STATUS}; }); }
-  saveDay(); renderCells(); refreshAllDayCheck();
-}
-window.toggleRangeExpand=function(type){
-  document.getElementById(type+'Expand').classList.toggle('open');
-  document.getElementById((type==='izin'?'yemek':'izin')+'Expand').classList.remove('open');
-}
-function fillTimeSelects(){
-  ['izinStart','izinEnd','yemekStart','yemekEnd'].forEach(id=>{ const s=document.getElementById(id); s.innerHTML=''; TIMES.forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; s.appendChild(o); }); });
-  setSelVal('izinStart','09:00'); setSelVal('izinEnd','12:00'); setSelVal('yemekStart','12:30'); setSelVal('yemekEnd','13:30');
-}
-function setSelVal(id,val){ const s=document.getElementById(id); for(let i=0;i<s.options.length;i++){if(s.options[i].value===val){s.selectedIndex=i;return;}} }
-window.applyRange=function(type){
-  const ai=currentAdvisorIdx, st=type==='yemek'?YEMEK_STATUS:IZIN_STATUS;
-  const start=document.getElementById(type+'Start').value, end=document.getElementById(type+'End').value;
-  let inRange=false;
-  TIMES.forEach(t=>{ if(t===start)inRange=true; if(inRange)cells[`${ai}||${t}`]={...st}; if(t===end)inRange=false; });
-  document.getElementById(type+'Expand').classList.remove('open');
-  saveDay(); renderCells(); refreshAllDayCheck();
-}
-window.clearAdvisorDay=function(){
-  if(!confirm(`${advisors[currentAdvisorIdx]} için bugünkü tüm kayıtlar silinsin mi?`))return;
-  TIMES.forEach(t=>delete cells[`${currentAdvisorIdx}||${t}`]);
-  saveDay(); renderCells(); refreshAllDayCheck();
-}
+window.closeAdvPanel=function(){document.getElementById('advOverlay').classList.remove('open');}
+function refreshIzin(){const v=TM.every(t=>{const c=cells[`|${curAdvIdx}|${t}`];return c&&c.code==='!';});document.getElementById('allIzinCard').className='bcard'+(v?' active':'');document.getElementById('allIzinChk').style.display=v?'block':'none';}
+window.toggleAllIzin=function(){const ai=curAdvIdx,v=TM.every(t=>{const c=cells[`|${ai}|${t}`];return c&&c.code==='!';});if(v){TM.forEach(t=>{if(cells[`|${ai}|${t}`]?.code==='!')delete cells[`|${ai}|${t}`];});}else{TM.forEach(t=>{cells[`|${ai}|${t}`]={...IZ};});}pushData();renderCells();refreshIzin();}
+window.toggleRng=function(tp){document.getElementById(tp+'Exp').classList.toggle('open');document.getElementById((tp==='iz'?'ym':'iz')+'Exp').classList.remove('open');}
+function fillSels(){['iz','ym'].forEach(tp=>{['S','E'].forEach(se=>{const s=document.getElementById(tp+se);s.innerHTML='';TM.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;s.appendChild(o);});});});setSel('izS','09:00');setSel('izE','12:00');setSel('ymS','12:30');setSel('ymE','13:30');}
+function setSel(id,v){const s=document.getElementById(id);for(let i=0;i<s.options.length;i++)if(s.options[i].value===v){s.selectedIndex=i;return;}}
+window.applyRng=function(tp){const ai=curAdvIdx,st=tp==='ym'?YM:IZ,s=document.getElementById(tp+'S').value,e=document.getElementById(tp+'E').value;let inR=false;TM.forEach(t=>{if(t===s)inR=true;if(inR)cells[`|${ai}|${t}`]={...st};if(t===e)inR=false;});document.getElementById(tp+'Exp').classList.remove('open');pushData();renderCells();refreshIzin();}
+window.clearAdvDay=function(){if(!confirm(`${advisors[curAdvIdx]} için bugünkü tüm kayıtlar silinsin mi?`))return;TM.forEach(t=>delete cells[`|${curAdvIdx}|${t}`]);pushData();renderCells();refreshIzin();}
 
-// ===== CELL MODAL =====
-function openCellModal(advisorIdx,time){
-  const key=`${advisorIdx}||${time}`;
-  const name=advisorIdx==='walkin'?'Randevusuz Gelen':advisors[advisorIdx];
-  document.getElementById('cellModalInfo').innerHTML=`<b>${name}</b> &mdash; <b>${time}</b>`;
-  document.getElementById('plakaSection').style.display='none';
-  document.getElementById('plakaInput').value=cells[key]?.plaka||'';
-  buildCellStatusList(advisorIdx,time);
-  document.getElementById('cellOverlay').classList.add('open');
+// CELL MODAL
+function openCell(ai,t){
+  const key=`|${ai}|${t}`,nm=ai==='w'?'Randevusuz Gelen':advisors[ai];
+  document.getElementById('cInfo').innerHTML=`<b>${nm}</b> &mdash; <b>${t}</b>`;
+  document.getElementById('plakSec').style.display='none';document.getElementById('plakInput').value=cells[key]?.plaka||'';
+  buildCellList(ai,t);document.getElementById('cellOverlay').classList.add('open');
 }
-window.closeCellModal=function(){ document.getElementById('cellOverlay').classList.remove('open'); }
-function buildCellStatusList(advisorIdx,time){
-  const key=`${advisorIdx}||${time}`, existing=cells[key];
-  const opts=document.getElementById('statusOptions'); opts.innerHTML='';
-  if(existing){ const c=document.createElement('button'); c.className='status-btn'; c.style.background='#555'; c.textContent='✕ Temizle'; c.onclick=()=>{ clearCell(key); closeCellModal(); }; opts.appendChild(c); }
-  STATUSES.forEach(s=>{
-    const btn=document.createElement('button'); btn.className='status-btn'; btn.style.background=s.color;
-    btn.textContent=`${s.code} — ${s.label}${s.plaka?' 🚗':''}`;
-    btn.onclick=()=>{ if(s.plaka)showPlakaInput(s,key,advisorIdx,time); else{ setCell(key,{...s,plaka:''}); closeCellModal(); } };
-    opts.appendChild(btn);
-  });
+window.closeCellM=function(){document.getElementById('cellOverlay').classList.remove('open');}
+function buildCellList(ai,t){
+  const key=`|${ai}|${t}`,ex=cells[key],opts=document.getElementById('sOpts');opts.innerHTML='';
+  if(ex){const c=document.createElement('button');c.className='sbtn';c.style.background='#555';c.textContent='X Temizle';c.onclick=()=>{delete cells[key];const el=document.getElementById(`c|${ai}|${t}`);if(el){el.style.background='';el.style.color='';el.textContent='';}updCounts();pushData();closeCellM();};opts.appendChild(c);}
+  ST.forEach(s=>{const b=document.createElement('button');b.className='sbtn';b.style.background=s.color;b.textContent=`${s.code} — ${s.label}${s.plaka?' [P]':''}`;b.onclick=()=>{if(s.plaka)showPlak(s,key,ai,t);else{cells[key]={...s,plaka:''};applyCell2(key,s,'');updCounts();pushData();closeCellM();}};opts.appendChild(b);});
 }
-function showPlakaInput(s,key,advisorIdx,time){
-  document.getElementById('plakaSection').style.display='block';
-  document.getElementById('plakaInput').focus();
-  const opts=document.getElementById('statusOptions'); opts.innerHTML='';
-  const sb=document.createElement('button'); sb.className='status-btn'; sb.style.background=s.color; sb.textContent='✓ Kaydet';
-  sb.onclick=()=>{ const p=document.getElementById('plakaInput').value.toUpperCase().trim(); setCell(key,{...s,plaka:p}); closeCellModal(); };
-  opts.appendChild(sb);
-  const bb=document.createElement('button'); bb.className='back-btn'; bb.textContent='← Geri';
-  bb.onclick=()=>{ document.getElementById('plakaSection').style.display='none'; buildCellStatusList(advisorIdx,time); };
-  opts.appendChild(bb);
-}
-function setCell(key,status){ cells[key]=status; applyCellStyle(key,status); updateCounts(); saveDay(); }
-function clearCell(key){
-  delete cells[key];
-  const[ai,t]=key.split('||'), el=document.getElementById(`c||${ai}||${t}`);
-  if(el){el.style.background='';el.style.color='';el.textContent='';}
-  updateCounts(); saveDay();
-}
-window.clearAll=function(){
-  if(!confirm('Bu güne ait tüm kayıtları silmek istediğinizden emin misiniz?'))return;
-  cells={};
-  document.querySelectorAll('.cell').forEach(el=>{el.style.background='';el.style.color='';el.textContent='';});
-  updateCounts(); saveDay();
-}
-
-// ===== SETTINGS =====
-window.openSettings=function(){
-  renderAdvList();
-  document.getElementById('settingsOverlay').classList.add('open');
-}
-window.closeSettings=function(){ document.getElementById('settingsOverlay').classList.remove('open'); }
-window.switchTab=function(tab){
-  document.querySelectorAll('.stab').forEach((b,i)=>b.classList.toggle('active',['advisors','sync'][i]===tab));
-  document.querySelectorAll('.stab-content').forEach(c=>c.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
-}
-function renderAdvList(){
-  const list=document.getElementById('advList'); list.innerHTML='';
-  advisors.forEach((name,ai)=>{
-    const row=document.createElement('div'); row.className='adv-row';
-    const photo=advisorPhotos[ai];
-    const av=document.createElement('div'); av.className='adv-av'; av.title='Fotoğraf ekle';
-    av.innerHTML=photo?`<img src="${photo}">`:`<span>${getInitials(name)}</span>`;
-    av.onclick=()=>triggerPhotoUpload(ai);
-    const nd=document.createElement('div'); nd.className='adv-name'; nd.textContent=name;
-    const eb=document.createElement('button'); eb.className='adv-edit-btn'; eb.textContent='✏️'; eb.onclick=()=>openEdit(ai);
-    const db=document.createElement('button'); db.className='adv-del-btn'; db.textContent='🗑️'; db.onclick=()=>deleteAdvisor(ai);
-    row.append(av,nd,eb,db); list.appendChild(row);
-  });
-}
-window.addAdvisor=function(){
-  const inp=document.getElementById('newAdvName'), name=inp.value.trim(); if(!name)return;
-  advisors.push(name); saveAdvisorsLocal(); inp.value=''; renderAdvList(); rebuildTable(); pushMetaToWorker();
-}
-function deleteAdvisor(ai){
-  if(!confirm(`"${advisors[ai]}" silinsin mi?`))return;
-  advisors.splice(ai,1);
-  const np={};
-  Object.entries(advisorPhotos).forEach(([k,v])=>{ const ki=parseInt(k); if(ki<ai)np[ki]=v; else if(ki>ai)np[ki-1]=v; });
-  advisorPhotos=np; saveAdvisorsLocal(); renderAdvList(); rebuildTable(); pushMetaToWorker();
-}
-function openEdit(ai){ editingAdvisorIdx=ai; document.getElementById('editAdvName').value=advisors[ai]; document.getElementById('editOverlay').classList.add('open'); }
-window.closeEdit=function(){ document.getElementById('editOverlay').classList.remove('open'); editingAdvisorIdx=null; }
-window.saveEditAdvisor=function(){
-  const name=document.getElementById('editAdvName').value.trim(); if(!name)return;
-  advisors[editingAdvisorIdx]=name; saveAdvisorsLocal(); closeEdit(); renderAdvList(); rebuildTable(); pushMetaToWorker();
-}
-function triggerPhotoUpload(ai){ photoTargetIdx=ai; document.getElementById('photoFileInput').click(); }
-window.handlePhotoUpload=function(event){
-  const file=event.target.files[0]; if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{ advisorPhotos[photoTargetIdx]=e.target.result; saveAdvisorsLocal(); renderAdvList(); rebuildTable(); pushMetaToWorker(); };
-  reader.readAsDataURL(file); event.target.value='';
-}
-
-function pushMetaToWorker(){
-  if(!workerUrl)return;
-  fetch(`${workerUrl}/meta`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({advisors,photos:advisorPhotos})}).catch(()=>{});
-}
-
-// ===== LEGEND =====
-function buildLegend(){
-  const lg=document.getElementById('legend');
-  lg.innerHTML='<strong style="font-size:11px;color:#555;align-self:center;white-space:nowrap;">Kodlar:</strong>';
-  STATUSES.forEach(s=>{ const d=document.createElement('div'); d.className='legend-item'; d.innerHTML=`<div class="legend-dot" style="background:${s.color};"></div><span><b>${s.code}</b> — ${s.label}${s.plaka?' 🚗':''}</span>`; lg.appendChild(d); });
-}
-
-// ===== EVENTS =====
-['advisorOverlay','cellOverlay','settingsOverlay','editOverlay'].forEach(id=>{ document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open')); });
-document.getElementById('plakaInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){const b=document.querySelector('#statusOptions .status-btn');if(b)b.click();} });
-document.getElementById('editAdvName').addEventListener('keydown',e=>{ if(e.key==='Enter')saveEditAdvisor(); });
-
-// ===== BOOT =====
-try {
-  buildTable();
-  buildLegend();
-  initDate();
-  renderCells();
-} catch(e) {
-  console.error('Boot error:', e);
-  document.getElementById('syncText').textContent = 'Hata: '+e.message;
-}
-</script>
-
-<!-- TV MODE OVERLAY -->
-<div id="tvOverlay" style="display:none;position:fixed;inset:0;background:#0a1628;z-index:999;flex-direction:column;overflow:hidden;">
-  <div id="tvBar" style="background:#1a3a5c;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-    <div style="color:#fff;font-size:22px;font-weight:700;letter-spacing:2px;">📋 RANDEVU PLANLAMA PANOSU</div>
-    <div id="tvClock" style="color:#f39c12;font-size:26px;font-weight:700;font-family:monospace;"></div>
-    <div id="tvDate" style="color:#aed6f1;font-size:18px;font-weight:600;"></div>
-    <button onclick="closeTVMode()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;padding:8px 18px;border-radius:8px;font-size:14px;cursor:pointer;">✕ Kapat</button>
-  </div>
-  <div id="tvContent" style="flex:1;overflow:hidden;padding:8px 10px;"></div>
-  <div id="tvLegend" style="background:#1a3a5c;padding:6px 16px;display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;"></div>
-</div>
-
-<style>
-#tvOverlay table { border-collapse:collapse; width:100%; height:100%; }
-#tvOverlay th { background:#1a3a5c; color:#fff; font-size:13px; padding:6px 4px; text-align:center; border:1px solid #2a4a7c; position:sticky; top:0; }
-#tvOverlay .tv-time { background:#b8d4ef; color:#1a3a5c; font-size:13px; font-weight:700; text-align:center; border:1px solid #aaa; padding:3px; white-space:nowrap; }
-#tvOverlay .tv-time.hour { background:#7fb3e8; font-size:15px; border-top:2px solid #555; }
-#tvOverlay .tv-cell { text-align:center; border:1px solid #333; font-size:14px; font-weight:700; color:#fff; padding:2px; letter-spacing:1px; }
-#tvOverlay .tv-cell.empty { background:#2a2a2a; }
-#tvOverlay .tv-cell.hour { border-top:2px solid #555; }
-#tvOverlay .tv-count { font-size:15px; font-weight:800; color:#fff; text-align:center; border:1px solid #555; }
-.tv-leg-item { display:flex;align-items:center;gap:5px;font-size:11px;color:#ddd; }
-.tv-leg-dot { width:14px;height:14px;border-radius:3px;flex-shrink:0; }
-</style>
-
-<script>
-let tvTimer = null;
-
-window.openTVMode = function() {
-  renderTV();
-  document.getElementById('tvOverlay').style.display = 'flex';
-  updateTVClock();
-  tvTimer = setInterval(() => {
-    updateTVClock();
-    if(workerUrl) {
-      fetch(`${workerUrl}/data?date=${currentDate}`)
-        .then(r=>r.json()).then(j=>{ cells=j.cells||{}; renderTV(); }).catch(()=>{});
-    }
-  }, 15000);
-}
-
-window.closeTVMode = function() {
-  document.getElementById('tvOverlay').style.display = 'none';
-  if(tvTimer) clearInterval(tvTimer);
-}
-
-function updateTVClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  const s = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('tvClock').textContent = `${h}:${m}:${s}`;
-  const days = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
-  const months = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
-  document.getElementById('tvDate').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-}
-
-// Her saniye saati güncelle
-setInterval(()=>{
-  if(document.getElementById('tvOverlay').style.display!=='none') updateTVClock();
-}, 1000);
-
-function renderTV() {
-  const STATUS_MAP = {};
-  STATUSES.forEach(s => STATUS_MAP[s.code] = s);
-
-  // Dolu satırları filtrele
-  const activeTimes = TIMES.filter(t => {
-    return advisors.some((_,ai) => cells[`${ai}||${t}`]) || cells[`walkin||${t}`];
-  });
-  const displayTimes = activeTimes.length > 0 ? activeTimes : TIMES;
-
-  // Sayım satırı
-  const counts = advisors.map((_,ai) =>
-    Object.entries(cells).filter(([k,v])=>k.startsWith(`${ai}||`)&&v.sayma).length
-  );
-
-  let html = `<div style="overflow-y:auto;height:100%;"><table>
-    <thead><tr>
-      <th style="width:60px;min-width:60px;">SAAT</th>`;
-
-  advisors.forEach((name, ai) => {
-    const photo = advisorPhotos[ai];
-    const av = photo
-      ? `<img src="${photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 2px;">`
-      : `<div style="width:32px;height:32px;border-radius:50%;background:#5a8cbf;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 2px;">${getInitials(name)}</div>`;
-    html += `<th>
-      ${av}
-      <div style="font-size:11px;">${name}</div>
-      <div style="background:#cc0000;color:#fff;font-size:14px;font-weight:800;border-radius:4px;padding:1px 4px;display:inline-block;min-width:22px;">${counts[ai]}</div>
-    </th>`;
-  });
-
-  // Walkin
-  const wCnt = Object.entries(cells).filter(([k,v])=>k.startsWith('walkin||')&&v.sayma).length;
-  html += `<th><div style="font-size:11px;">Randevusuz<br>Gelen</div>
-    <div style="background:#cc0000;color:#fff;font-size:14px;font-weight:800;border-radius:4px;padding:1px 4px;display:inline-block;min-width:22px;">${wCnt}</div></th>
-    </tr></thead><tbody>`;
-
-  displayTimes.forEach(t => {
-    const isHour = t.endsWith(':00');
-    html += `<tr>
-      <td class="tv-time${isHour?' hour':''}">${t}</td>`;
-    advisors.forEach((_,ai) => {
-      const key = `${ai}||${t}`;
-      const status = cells[key];
-      const cls = `tv-cell${isHour?' hour':''} ${status?'':'empty'}`;
-      const bg = status ? status.color : '';
-      const txt = status ? (status.plaka || status.code) : '';
-      html += `<td class="${cls}" style="${bg?'background:'+bg+';':''}">${txt}</td>`;
+function applyCell2(key,s,pl){const parts=key.split('|');const el=document.getElementById(`c|${parts[1]}|${parts[2]}`);if(!el)return;el.style.background=s.color;el.style.color='#fff';el.textContent=pl||s.code;el.style.fontSize=pl?'11px':'12px';}
+function showPlak(s,key,ai,t){document.getElementById('plakSec').style.display='block';document.getElementById('plakInput').focus();
+  // Mevcut plaka varsa geçmiş kontrol et
+  const mevPlaka = document.getElementById('plakInput').value;
+  if(mevPlaka && mevPlaka.length >= 5) {
+    kontrolPlakaGecmis(mevPlaka).then(stat => {
+      if(stat && stat.gelmedi >= 2) {
+        const hint = document.querySelector('#plakSec .plaka-hint')||document.querySelector('#plakSec div');
+        if(hint) hint.innerHTML = '<span style="color:#c0392b;font-weight:700;">UYARI: Bu plaka daha once ' + stat.gelmedi + ' kez gelmedi!</span>';
+      }
     });
-    const wkey = `walkin||${t}`;
-    const ws2 = cells[wkey];
-    html += `<td class="tv-cell${isHour?' hour':''} ${ws2?'':'empty'}" style="${ws2?'background:'+ws2.color+';':''}">${ws2?(ws2.plaka||ws2.code):''}</td></tr>`;
-  });
+  }const opts=document.getElementById('sOpts');opts.innerHTML='';const sb=document.createElement('button');sb.className='sbtn';sb.style.background=s.color;sb.textContent='V Kaydet';sb.onclick=()=>{const pl=document.getElementById('plakInput').value.toUpperCase().trim();cells[key]={...s,plaka:pl};applyCell2(key,s,pl);updCounts();pushData();closeCellM();};opts.appendChild(sb);const bb=document.createElement('button');bb.className='backbtn';bb.textContent='< Geri';bb.onclick=()=>{document.getElementById('plakSec').style.display='none';buildCellList(ai,t);};opts.appendChild(bb);}
+window.clearAll=function(){if(!confirm('Bu güne ait tüm kayıtları silmek istediğinizden emin misiniz?'))return;cells={};document.querySelectorAll('.cell').forEach(el=>{el.style.background='';el.style.color='';el.textContent='';});updCounts();pushData();}
 
-  html += '</tbody></table></div>';
-  document.getElementById('tvContent').innerHTML = html;
+// SETTINGS
+window.openSettings=function(){renderAdvList();renderUList();document.getElementById('settOverlay').classList.add('open');}
+window.closeSett=function(){document.getElementById('settOverlay').classList.remove('open');}
+window.swTab=function(tab){document.querySelectorAll('.stab').forEach((b,i)=>b.classList.toggle('active',['advisors','users'][i]===tab));document.querySelectorAll('.scont').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+tab).classList.add('active');}
+function renderAdvList(){const list=document.getElementById('advListEl');list.innerHTML='';advisors.forEach((nm,ai)=>{const row=document.createElement('div');row.className='advrow';const ph=photos[ai];const av=document.createElement('div');av.className='aav2';av.innerHTML=ph?`<img src="${ph}">`:`<span>${gi(nm)}</span>`;av.onclick=()=>trigPhoto(ai);const nd=document.createElement('div');nd.className='an';nd.textContent=nm;const eb=document.createElement('button');eb.className='eb';eb.textContent='Duzenle';eb.onclick=()=>openEdit(ai);const db=document.createElement('button');db.className='db';db.textContent='Temizle';db.onclick=()=>delAdv(ai);row.append(av,nd,eb,db);list.appendChild(row);});}
+function renderUList(){const list=document.getElementById('uListEl');list.innerHTML='';advisors.forEach((nm,ai)=>{const un=UMAP[ai]||nm.split(' ')[0].toLowerCase();const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;background:#fafafa;font-size:12px;margin-bottom:6px;';const ph=photos[ai];row.innerHTML=`<div style="width:34px;height:34px;border-radius:50%;background:#5a8cbf;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;overflow:hidden;">${ph?`<img src="${ph}" style="width:100%;height:100%;object-fit:cover;">`:`${gi(nm)}`}</div><div><div style="font-weight:600;color:#1a3a5c;">${nm}</div><div style="color:#888;">Kullanıcı: <b>${un}</b> · Şifre: <b>1234</b> (değiştirilebilir)</div></div>`;list.appendChild(row);});const ar=document.createElement('div');ar.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #1a3a5c;border-radius:8px;background:#f0f7ff;font-size:12px;';ar.innerHTML=`<div style="width:34px;height:34px;border-radius:50%;background:#1a3a5c;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;">YON</div><div><div style="font-weight:600;color:#1a3a5c;">Yönetici</div><div style="color:#888;">Kullanıcı: <b>admin</b> · Şifre: <b>Odak2026</b></div></div>`;list.appendChild(ar);}
+window.addAdv=function(){const inp=document.getElementById('newAdvN'),nm=inp.value.trim();if(!nm)return;advisors.push(nm);localStorage.setItem('adv2',JSON.stringify(advisors));inp.value='';renderAdvList();rebuildTable();pushMeta();}
+function delAdv(ai){if(!confirm(`"${advisors[ai]}" silinsin mi?`))return;advisors.splice(ai,1);const np={};Object.entries(photos).forEach(([k,v])=>{const ki=parseInt(k);if(ki<ai)np[ki]=v;else if(ki>ai)np[ki-1]=v;});photos=np;localStorage.setItem('adv2',JSON.stringify(advisors));localStorage.setItem('advPh',JSON.stringify(photos));renderAdvList();rebuildTable();pushMeta();}
+function openEdit(ai){editIdx=ai;document.getElementById('editN').value=advisors[ai];document.getElementById('editOverlay').classList.add('open');}
+window.closeEdit=function(){document.getElementById('editOverlay').classList.remove('open');}
+window.saveEdit=function(){const nm=document.getElementById('editN').value.trim();if(!nm)return;advisors[editIdx]=nm;localStorage.setItem('adv2',JSON.stringify(advisors));closeEdit();renderAdvList();rebuildTable();pushMeta();}
+function trigPhoto(ai){photoIdx=ai;document.getElementById('photoFI').click();}
+window.handlePhoto=function(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{photos[photoIdx]=e.target.result;localStorage.setItem('advPh',JSON.stringify(photos));renderAdvList();rebuildTable();pushMeta();};r.readAsDataURL(f);ev.target.value='';}
 
-  // Legend
-  const lg = document.getElementById('tvLegend');
-  lg.innerHTML = '';
-  STATUSES.forEach(s => {
-    const d = document.createElement('div'); d.className='tv-leg-item';
-    d.innerHTML = `<div class="tv-leg-dot" style="background:${s.color};"></div><span>${s.code} — ${s.label}</span>`;
-    lg.appendChild(d);
-  });
+// LEGEND
+function buildLegend(){const lg=document.getElementById('lgWrap');lg.innerHTML='<strong style="font-size:11px;color:#555;align-self:center;white-space:nowrap;">Kodlar:</strong>';ST.forEach(s=>{const d=document.createElement('div');d.className='lgitem';d.innerHTML=`<div class="lgdot" style="background:${s.color};"></div><span><b>${s.code}</b> — ${s.label}${s.plaka?' [P]':''}</span>`;lg.appendChild(d);});}
+
+// TV
+window.openTV=function(){renderTV();document.getElementById('tvOverlay').style.display='flex';updClock();tvT=setInterval(()=>{updClock();api(`/data?date=${curDate}`).then(r=>r.json()).then(d=>{cells=d.cells||{};renderTV();}).catch(()=>{});},15000);}
+window.closeTV=function(){document.getElementById('tvOverlay').style.display='none';if(tvT)clearInterval(tvT);}
+function updClock(){const n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0'),s=String(n.getSeconds()).padStart(2,'0');document.getElementById('tvClock').textContent=`${h}:${m}:${s}`;const days=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'],months=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];document.getElementById('tvDate').textContent=`${days[n.getDay()]}, ${n.getDate()} ${months[n.getMonth()]} ${n.getFullYear()}`;}
+setInterval(()=>{if(document.getElementById('tvOverlay').style.display!=='none')updClock();},1000);
+function renderTV(){const cnts=advisors.map((_,ai)=>Object.entries(cells).filter(([k,v])=>k.includes(`|${ai}|`)&&v.sayma).length);let h=`<div style="overflow-y:auto;height:100%;"><table><thead><tr><th style="width:60px;">SAAT</th>`;advisors.forEach((nm,ai)=>{const ph=photos[ai];const av=ph?`<img src="${ph}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 2px;">`:`<div style="width:32px;height:32px;border-radius:50%;background:#5a8cbf;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 2px;">${gi(nm)}</div>`;h+=`<th>${av}<div style="font-size:11px;">${nm}</div><div style="background:#cc0000;color:#fff;font-size:14px;font-weight:800;border-radius:4px;padding:1px 4px;display:inline-block;min-width:22px;">${cnts[ai]}</div></th>`;});const wc=Object.entries(cells).filter(([k,v])=>k.startsWith('|w|')&&v.sayma).length;h+=`<th><div style="font-size:11px;">Randevusuz<br>Gelen</div><div style="background:#cc0000;color:#fff;font-size:14px;font-weight:800;border-radius:4px;padding:1px 4px;display:inline-block;min-width:22px;">${wc}</div></th></tr></thead><tbody>`;TM.forEach(t=>{const ih=t.endsWith(':00');h+=`<tr><td class="tvtime${ih?' h':''}">${t}</td>`;advisors.forEach((_,ai)=>{const s=cells[`|${ai}|${t}`];h+=`<td class="tvcell${ih?' h':''} ${s?'':'e'}" style="${s?'background:'+s.color+';':''}">${s?(s.plaka||s.code):''}</td>`;});const ws=cells[`|w|${t}`];h+=`<td class="tvcell${ih?' h':''} ${ws?'':'e'}" style="${ws?'background:'+ws.color+';':''}">${ws?(ws.plaka||ws.code):''}</td></tr>`;});h+='</tbody></table></div>';document.getElementById('tvContent').innerHTML=h;const lg=document.getElementById('tvLegend');lg.innerHTML='';ST.forEach(s=>{const d=document.createElement('div');d.className='tvleg';d.innerHTML=`<div class="tvlegdot" style="background:${s.color};"></div><span>${s.code} — ${s.label}</span>`;lg.appendChild(d);});}
+
+// DANIŞMAN PORTAL
+window.showAdvTab=function(tab){document.getElementById('advTabPlan').style.display=tab==='plan'?'block':'none';document.getElementById('advTabPwd').style.display=tab==='pwd'?'block':'none';}
+window.loadAdvPlan=async function(silent=false){const dt=document.getElementById('advDate').value||today();curDate=dt;document.getElementById('advTitle').textContent=`Günlük Planım — ${fmtDate(dt)}`;try{const r=await api(`/data?date=${dt}`);if(r.status===401){doLogout();return;}const d=await r.json();cells=d.cells||{};}catch(e){}renderAdvPlan();}
+function renderAdvPlan(){const ai=advIdx;const mc=Object.entries(cells).filter(([k])=>k.includes(`|${ai}|`));const rC=mc.filter(([,v])=>v.code==='R').length,mC=mc.filter(([,v])=>v.code==='M').length,xC=mc.filter(([,v])=>v.code==='X').length;const izin=TM.every(t=>{const c=cells[`|${ai}|${t}`];return c&&c.code==='!';});
+document.getElementById('advSum').innerHTML=`<div class="sumcard" style="border-color:#16a085;"><div class="sn" style="color:#16a085;">${rC}</div><div class="sl">Randevu Geldi</div></div><div class="sumcard" style="border-color:#27ae60;"><div class="sn" style="color:#27ae60;">${mC}</div><div class="sl">Görüşme</div></div><div class="sumcard" style="border-color:#7f8c8d;"><div class="sn" style="color:#7f8c8d;">${xC}</div><div class="sl">Gelmedi</div></div><div class="sumcard" style="border-color:#e74c3c;"><div class="sn" style="color:${izin?'#e74c3c':'#ccc'};">${izin?'V':'—'}</div><div class="sl">Tüm Gün İzin</div></div>`;
+const grid=document.getElementById('slotGrid');grid.innerHTML='';
+TM.forEach(t=>{const ih=t.endsWith(':00'),key=`|${ai}|${t}`,st=cells[key],s=ST.find(x=>x.code===st?.code);const card=document.createElement('div');card.className='slotcard'+(ih?' hr':'');if(st)card.style.borderLeftColor=st.color;let inner=st?`<div style="flex:1;"><span class="scode" style="background:${st.color};">${st.code}</span><div class="slbl">${s?.label||''}</div>${st.plaka?`<div class="splaka">[P] ${st.plaka}</div>`:''}</div>`:`<div class="sempty" style="flex:1;">Boş</div>`;card.innerHTML=`<div class="stime">${t}</div>${inner}<div style="font-size:16px;color:#ccc;">›</div>`;card.onclick=()=>{openCell(ai,t);};grid.appendChild(card);});}
+
+// ŞİFRE DEĞİŞTİR
+window.changePwd=async function(){
+  const o=document.getElementById('oldPwd').value,n1=document.getElementById('newPwd').value,n2=document.getElementById('newPwd2').value;
+  const msg=document.getElementById('pwdMsg');
+  if(!o||!n1||!n2){msg.style.color='#e74c3c';msg.textContent='Tüm alanları doldurun.';return;}
+  if(n1!==n2){msg.style.color='#e74c3c';msg.textContent='Yeni şifreler eşleşmiyor.';return;}
+  if(n1.length<4){msg.style.color='#e74c3c';msg.textContent='En az 4 karakter.';return;}
+  try{const r=await api('/change-password',{method:'POST',body:JSON.stringify({oldPassword:o,newPassword:n1})});const d=await r.json();if(!r.ok){msg.style.color='#e74c3c';msg.textContent=d.error||'Hata';return;}msg.style.color='#27ae60';msg.textContent='V Şifreniz güncellendi!';document.getElementById('oldPwd').value='';document.getElementById('newPwd').value='';document.getElementById('newPwd2').value='';}catch(e){msg.style.color='#e74c3c';msg.textContent='Bağlantı hatası.';}
 }
 
-// ESC ile TV modundan çık
-document.addEventListener('keydown', e => {
-  if(e.key==='Escape' && document.getElementById('tvOverlay').style.display!=='none') closeTVMode();
-  if(e.key==='F11' && document.getElementById('tvOverlay').style.display!=='none') {
-    if(!document.fullscreenElement) document.getElementById('tvOverlay').requestFullscreen();
-    else document.exitFullscreen();
-  }
-});
-</script>
+// EVENTS
+[['raporOverlay','closeRapor'],['advOverlay','closeAdvPanel'],['cellOverlay','closeCellM'],['settOverlay','closeSett'],['editOverlay','closeEdit']].forEach(([id,fn])=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this)window[fn]();});});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.moverlay.open').forEach(m=>m.classList.remove('open'));if(document.getElementById('tvOverlay').style.display!=='none')closeTV();}if(e.key==='F11'&&document.getElementById('tvOverlay').style.display!=='none'){e.preventDefault();if(!document.fullscreenElement)document.getElementById('tvOverlay').requestFullscreen();else document.exitFullscreen();}});
+document.getElementById('plakInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const b=document.querySelector('#sOpts .sbtn');if(b)b.click();}});
+document.getElementById('editN').addEventListener('keydown',e=>{if(e.key==='Enter')saveEdit();});
+['luser','lpass'].forEach(id=>{document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});});
 
+
+// ── RAPOR ────────────────────────────────────────────
+window.openRapor = function() {
+  document.getElementById('raporTip').value = 'hafta';
+  document.getElementById('ozelAralik').style.display = 'none';
+  renderRapor();
+  document.getElementById('raporOverlay').classList.add('open');
+}
+window.closeRapor = function() { document.getElementById('raporOverlay').classList.remove('open'); }
+
+document.getElementById('raporTip').addEventListener('change', function() {
+  document.getElementById('ozelAralik').style.display = this.value === 'ozel' ? 'flex' : 'none';
+  if(this.value !== 'ozel') renderRapor();
+});
+
+function getDateRange(tip) {
+  const now = new Date();
+  let bas, bit;
+  if(tip === 'hafta') {
+    const day = now.getDay() || 7;
+    bas = new Date(now); bas.setDate(now.getDate() - day + 1);
+    bit = new Date(now); bit.setDate(now.getDate() - day + 7);
+  } else if(tip === 'ay') {
+    bas = new Date(now.getFullYear(), now.getMonth(), 1);
+    bit = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  } else {
+    const b = document.getElementById('raporBas').value;
+    const bt = document.getElementById('raporBit').value;
+    if(!b || !bt) return null;
+    bas = new Date(b); bit = new Date(bt);
+  }
+  const dates = [];
+  const cur = new Date(bas);
+  while(cur <= bit) {
+    dates.push(cur.toISOString().slice(0,10));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return dates;
+}
+
+async function renderRapor() {
+  const tip = document.getElementById('raporTip').value;
+  const dates = getDateRange(tip);
+  if(!dates) return;
+
+  // Tüm günlerin verisini çek
+  const allCells = {};
+  await Promise.all(dates.map(async date => {
+    try {
+      const r = await api(`/data?date=${date}`);
+      const d = await r.json();
+      allCells[date] = d.cells || {};
+    } catch(e) { allCells[date] = {}; }
+  }));
+
+  // Toplu istatistik
+  let totR=0, totM=0, totX=0, totGec=0, totD=0;
+  const advStats = advisors.map((_,ai) => ({r:0,m:0,x:0,gec:0,d:0,plakalar:[],gelmeyen:[]}));
+  const plakaGelmedi = {}; // plaka -> kac kez gelmedi
+
+  dates.forEach(date => {
+    const dc = allCells[date] || {};
+    Object.entries(dc).forEach(([key, val]) => {
+      const parts = key.split('|');
+      const ai = parseInt(parts[1]);
+      const isAdv = !isNaN(ai) && ai >= 0 && ai < advisors.length;
+      if(val.code==='R'){ totR++; if(isAdv){ advStats[ai].r++; if(val.plaka)advStats[ai].plakalar.push(val.plaka); } }
+      if(val.code==='M'){ totM++; if(isAdv)advStats[ai].m++; }
+      if(val.code==='X'){ totX++; if(isAdv){ advStats[ai].x++; if(val.plaka){ advStats[ai].gelmeyen.push(val.plaka); plakaGelmedi[val.plaka]=(plakaGelmedi[val.plaka]||0)+1; } } }
+      if(val.code==='!!'){ totGec++; if(isAdv)advStats[ai].gec++; }
+      if(val.code==='D'){ totD++; if(isAdv)advStats[ai].d++; }
+    });
+  });
+
+  // Özet kartlar
+  const oz = document.getElementById('raporOzet');
+  oz.innerHTML = `
+    <div class="rapor-kart" style="border-top-color:#16a085;"><div class="rn" style="color:#16a085;">${totR}</div><div class="rl">Toplam Geldi (R)</div></div>
+    <div class="rapor-kart" style="border-top-color:#27ae60;"><div class="rn" style="color:#27ae60;">${totM}</div><div class="rl">Toplam Görüşme (M)</div></div>
+    <div class="rapor-kart" style="border-top-color:#7f8c8d;"><div class="rn" style="color:#7f8c8d;">${totX}</div><div class="rl">Gelmedi (X)</div></div>
+    <div class="rapor-kart" style="border-top-color:#c0392b;"><div class="rn" style="color:#c0392b;">${totGec}</div><div class="rl">Geçgeç (!!)</div></div>
+    <div class="rapor-kart" style="border-top-color:#d35400;"><div class="rn" style="color:#d35400;">${totD}</div><div class="rl">DRP8 (D)</div></div>
+    <div class="rapor-kart" style="border-top-color:#2980b9;"><div class="rn" style="color:#2980b9;">${dates.length}</div><div class="rl">İş Günü</div></div>
+  `;
+
+  // Danışman tablosu
+  const tablo = document.getElementById('raporTablo');
+  let html = `<thead><tr class="rtablo">
+    <th>Danışman</th><th>Geldi (R)</th><th>Görüşme (M)</th><th>Gelmedi (X)</th><th>Geçgeç (!!)</th><th>DRP8 (D)</th><th>Gelmeme %</th>
+  </tr></thead><tbody>`;
+  advisors.forEach((name, ai) => {
+    const s = advStats[ai];
+    const toplam = s.r + s.x;
+    const oran = toplam > 0 ? Math.round((s.x / toplam) * 100) : 0;
+    const oranRenk = oran >= 30 ? '#c0392b' : oran >= 15 ? '#e67e22' : '#27ae60';
+    html += `<tr>
+      <td style="text-align:left;font-weight:600;color:#1a3a5c;">${name}</td>
+      <td style="color:#16a085;font-weight:700;">${s.r}</td>
+      <td style="color:#27ae60;font-weight:700;">${s.m}</td>
+      <td style="color:#7f8c8d;font-weight:700;">${s.x}</td>
+      <td style="color:#c0392b;font-weight:700;">${s.gec}</td>
+      <td style="color:#d35400;font-weight:700;">${s.d}</td>
+      <td style="color:${oranRenk};font-weight:700;">%${oran}</td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  tablo.innerHTML = html;
+  tablo.className = 'rtablo';
+
+  // Tekrar gelmeyen plakalar
+  const uyari = document.getElementById('plakaUyari');
+  const tekrarlar = Object.entries(plakaGelmedi).filter(([,v]) => v >= 2).sort((a,b) => b[1]-a[1]);
+  if(tekrarlar.length === 0) {
+    uyari.innerHTML = '<span style="font-size:12px;color:#888;">Tekrar gelmeyen plaka yok.</span>';
+  } else {
+    uyari.innerHTML = tekrarlar.map(([plaka, sayi]) =>
+      `<div class="puyari">${plaka}<span>${sayi}x gelmedi</span></div>`
+    ).join('');
+  }
+}
+
+// ── OTOMATİK DURUM DEĞİŞİMİ ──────────────────────────
+// Her dakika kontrol: saati geçmiş R hücreleri -> !! yap
+let otoTimer = null;
+function startOtoKontrol() {
+  if(otoTimer) clearInterval(otoTimer);
+  otoTimer = setInterval(otoKontrol, 60000);
+  otoKontrol(); // hemen bir kez çalıştır
+}
+
+async function otoKontrol() {
+  if(uname !== 'admin' && role !== 'admin') return; // sadece admin
+  const now = new Date();
+  const curH = String(now.getHours()).padStart(2,'0');
+  const curM = String(now.getMinutes()).padStart(2,'0');
+  const curTime = `${curH}:${curM}`;
+  const curDateStr = today();
+  if(curDate !== curDateStr) return; // bugün değilse dokunma
+
+  let degisti = false;
+  const uyarilar = [];
+
+  Object.entries(cells).forEach(([key, val]) => {
+    if(val.code !== 'R') return; // sadece R olanlar
+    const parts = key.split('|');
+    const slotTime = parts[2];
+    if(!slotTime) return;
+    // Saat geçmiş mi? (15 dakika tolerans)
+    const [sh, sm] = slotTime.split(':').map(Number);
+    const [nh, nm] = [now.getHours(), now.getMinutes()];
+    const slotMin = sh * 60 + sm;
+    const nowMin  = nh * 60 + nm;
+    if(nowMin > slotMin + 15) {
+      // R -> !! yap
+      cells[key] = { ...val, code:'!!', label:'Randevusuna Geçgeç', color:'#c0392b' };
+      const ai = parts[1];
+      const name = ai === 'w' ? 'Randevusuz Gelen' : (advisors[parseInt(ai)] || '?');
+      uyarilar.push(`${name} - ${slotTime}`);
+      degisti = true;
+    }
+  });
+
+  if(degisti) {
+    renderCells();
+    pushData();
+    // Uyarı göster
+    if(uyarilar.length > 0) {
+      showOtoUyari(`Geciken randevular: ${uyarilar.slice(0,3).join(', ')}${uyarilar.length > 3 ? ' +' + (uyarilar.length-3) + ' daha' : ''}`);
+    }
+  }
+}
+
+function showOtoUyari(mesaj) {
+  let el = document.getElementById('otoUyariEl');
+  if(!el) {
+    el = document.createElement('div');
+    el.id = 'otoUyariEl';
+    el.className = 'oto-uyari';
+    document.body.appendChild(el);
+  }
+  el.textContent = mesaj;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+// Gelmeme oranı uyarısı — dashboard açıkken plaka kontrolü
+async function kontrolPlakaGecmis(plaka) {
+  if(!plaka || plaka.length < 3) return;
+  // Son 30 günün verisine bak
+  const dates = [];
+  const now = new Date();
+  for(let i=0; i<30; i++) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    dates.push(d.toISOString().slice(0,10));
+  }
+  let geldi = 0, gelmedi = 0;
+  await Promise.all(dates.map(async date => {
+    try {
+      const r = await api(`/data?date=${date}`);
+      const d = await r.json();
+      Object.values(d.cells || {}).forEach(v => {
+        if(v.plaka === plaka) {
+          if(v.code === 'R' || v.code === 'M') geldi++;
+          if(v.code === 'X') gelmedi++;
+        }
+      });
+    } catch(e) {}
+  }));
+  return { geldi, gelmedi };
+}
+
+// BOOT
+try{restore();}catch(e){}
+</script>
 </body>
 </html>
