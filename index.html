@@ -549,9 +549,12 @@ function updCounts(){advisors.forEach((_,ai)=>{const c=Object.entries(cells).fil
 window.showPage=function(pg){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+pg).classList.add('active');
-  document.getElementById('btnDash').style.display=pg==='dashboard'?'none':'';
-  document.getElementById('btnRapor').style.display=pg==='rapor'?'none':'';
-  document.getElementById('btnPano').style.display=(pg==='dashboard'||pg==='rapor')?'':'none';
+  // Pano butonu: dashboard veya rapor açıkken göster
+  document.getElementById('btnPano').style.display=(pg==='pano')?'none':'';
+  // Dashboard butonu: dashboard açıkken gizle
+  document.getElementById('btnDash').style.display=(pg==='dashboard')?'none':'';
+  // Rapor butonu: rapor açıkken gizle
+  document.getElementById('btnRapor').style.display=(pg==='rapor')?'none':'';
   if(pg==='dashboard'){document.getElementById('dashDate').value=curDate;renderDash();}
   if(pg==='rapor'){renderRapor();}
 }
