@@ -201,6 +201,24 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;}
 .puyari span { font-size:10px; font-weight:400; color:#e74c3c; margin-left:4px; }
 .oto-uyari { position:fixed; top:60px; right:16px; background:#c0392b; color:#fff; padding:10px 16px; border-radius:8px; font-size:13px; font-weight:600; z-index:999; box-shadow:0 4px 12px rgba(0,0,0,0.2); display:none; max-width:300px; }
 
+
+.rapor-kart { background:#fff; border-radius:8px; padding:12px; text-align:center; border:0.5px solid #ddd; border-top:3px solid #ddd; box-shadow:0 2px 6px rgba(0,0,0,.06); }
+.rapor-kart .rn { font-size:22px; font-weight:700; line-height:1; }
+.rapor-kart .rl { font-size:10px; color:#888; margin-top:3px; }
+.rtablo th { background:#1a3a5c; color:#fff; padding:8px 10px; text-align:center; font-size:11px; font-weight:600; border:1px solid #2a4a7c; white-space:nowrap; }
+.rtablo td { padding:7px 10px; text-align:center; font-size:12px; border:1px solid #e0e0e0; }
+.rtablo tr:nth-child(even) td { background:#f8f9fa; }
+.rtablo tr:hover td { background:#eef5ff; }
+.rtablo td:first-child { text-align:left; font-weight:600; color:#1a3a5c; }
+.puyari { display:inline-flex; align-items:center; gap:6px; background:#fff5f5; border:1.5px solid #e74c3c; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:700; color:#c0392b; letter-spacing:1px; }
+.puyari span { font-size:10px; font-weight:400; background:#e74c3c; color:#fff; padding:2px 6px; border-radius:4px; }
+.gun-bar { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.gun-bar .gn { font-size:11px; color:#555; width:80px; flex-shrink:0; white-space:nowrap; }
+.gun-bar .gb { height:20px; border-radius:4px; background:#16a085; min-width:2px; display:flex; align-items:center; padding:0 6px; }
+.gun-bar .gv { font-size:11px; color:#fff; font-weight:700; white-space:nowrap; }
+.gun-bar .gx { height:20px; border-radius:4px; background:#7f8c8d; min-width:2px; display:flex; align-items:center; padding:0 6px; margin-left:2px; }
+.oto-uyari { position:fixed; top:60px; right:16px; background:#c0392b; color:#fff; padding:10px 16px; border-radius:8px; font-size:13px; font-weight:600; z-index:999; box-shadow:0 4px 12px rgba(0,0,0,0.2); display:none; max-width:300px; }
+
 </style>
 </head>
 <body>
@@ -260,7 +278,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;}
     <button class="tbtn blue" id="btnDash" onclick="showPage('dashboard')">Dashboard</button>
     <button class="tbtn blue" id="btnPano" onclick="showPage('pano')" style="display:none;"> Pano</button>
     <button class="tbtn purple" onclick="openTV()">TV Modu</button>
-    <button class="tbtn green" onclick="openRapor()" style="background:rgba(39,174,96,0.85);">Rapor</button>
     <button class="tbtn gray" onclick="openSettings()">Ayarlar</button>
     <button class="tbtn gray" onclick="window.print()">Yazdir</button>
     <button class="tbtn red" onclick="clearAll()">Temizle</button>
@@ -278,6 +295,51 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;}
       <div class="gsec"><h3>Randevusuna Gelmeyenler</h3><table class="gtbl"><thead><tr><th>Danışman</th><th>Saat</th><th>Plaka</th></tr></thead><tbody id="gelBody"></tbody></table></div>
     </div>
   </div>
+
+  <div class="page" id="page-rapor">
+    <div class="dash">
+      <div class="dbar">
+        <h2>RAPOR & ANALIZ</h2>
+        <select id="raporTip" onchange="onRaporTipChange()" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+          <option value="hafta">Bu Hafta</option>
+          <option value="ay">Bu Ay</option>
+          <option value="ozel">Ozel Aralik</option>
+        </select>
+        <div id="ozelAralik" style="display:none;gap:6px;align-items:center;">
+          <input type="date" id="raporBas" style="padding:5px 8px;border-radius:6px;border:1px solid #ccc;font-size:12px;">
+          <span style="font-size:12px;color:#888;">-</span>
+          <input type="date" id="raporBit" style="padding:5px 8px;border-radius:6px;border:1px solid #ccc;font-size:12px;">
+          <button onclick="renderRapor()" style="padding:5px 12px;border-radius:6px;border:none;background:#1a3a5c;color:#fff;font-size:12px;cursor:pointer;">Getir</button>
+        </div>
+      </div>
+
+      <div id="raporYukleniyor" style="text-align:center;padding:30px;color:#888;font-size:13px;display:none;">Veriler yukleniyor...</div>
+
+      <!-- Ozet kartlar -->
+      <div id="raporOzet" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:18px;"></div>
+
+      <!-- Danisман tablosu -->
+      <div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #eee;">DANISМАН BAZLI OZET</div>
+        <div style="overflow-x:auto;">
+          <table id="raporTablo" style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px;"></table>
+        </div>
+      </div>
+
+      <!-- Gunluk dagilim -->
+      <div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #eee;">GUNLUK DAGILIM</div>
+        <div id="gunlukDagilim" style="overflow-x:auto;"></div>
+      </div>
+
+      <!-- Tekrar gelmeyen plakalar -->
+      <div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);">
+        <div style="font-size:13px;font-weight:700;color:#c0392b;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #fde8e8;">TEKRAR GELMEYEN PLAKALAR (2+ kez)</div>
+        <div id="plakaUyari" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ADVISOR BULK MODAL -->
@@ -308,44 +370,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;}
   </div>
 </div>
 
-
-<!-- RAPOR MODAL -->
-<div class="moverlay" id="raporOverlay">
-  <div class="smodal" style="max-width:680px;">
-    <div class="mhead" style="border-radius:14px 14px 0 0;">
-      <div style="font-size:16px;font-weight:700;color:#fff;">RAPOR & ANALIZ</div>
-      <button class="mclose" onclick="closeRapor()">X</button>
-    </div>
-    <div style="padding:14px;">
-      <!-- Dönem seçimi -->
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
-        <select id="raporTip" onchange="renderRapor()" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
-          <option value="hafta">Bu Hafta</option>
-          <option value="ay">Bu Ay</option>
-          <option value="ozel">Özel Aralık</option>
-        </select>
-        <div id="ozelAralik" style="display:none;gap:6px;align-items:center;display:none;">
-          <input type="date" id="raporBas" style="padding:5px 8px;border-radius:6px;border:1px solid #ccc;font-size:12px;">
-          <span style="font-size:12px;color:#888;">-</span>
-          <input type="date" id="raporBit" style="padding:5px 8px;border-radius:6px;border:1px solid #ccc;font-size:12px;">
-          <button onclick="renderRapor()" style="padding:5px 12px;border-radius:6px;border:none;background:#1a3a5c;color:#fff;font-size:12px;cursor:pointer;">Getir</button>
-        </div>
-      </div>
-      <!-- Özet kartlar -->
-      <div id="raporOzet" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:16px;"></div>
-      <!-- Danışman tablosu -->
-      <div style="font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #eee;">DANIŞMAN BAZLI ÖZET</div>
-      <div style="overflow-x:auto;">
-        <table id="raporTablo" style="width:100%;border-collapse:collapse;font-size:12px;"></table>
-      </div>
-      <!-- Gelmeme uyarıları -->
-      <div style="margin-top:16px;">
-        <div style="font-size:12px;font-weight:700;color:#c0392b;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #fde8e8;">TEKRAR GELMEYEN PLAKALAR (2+ kez)</div>
-        <div id="plakaUyari" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- SETTINGS MODAL -->
 <div class="moverlay" id="settOverlay">
@@ -522,7 +546,15 @@ function applyCell(key,s){const[ai,t]=key.split('|').slice(0,2).concat([key.spli
 function updCounts(){advisors.forEach((_,ai)=>{const c=Object.entries(cells).filter(([k,v])=>k.startsWith(`|${ai}|`)&&v.sayma).length;const el=document.getElementById(`cnt-${ai}`);if(el)el.textContent=c;});const wc=Object.entries(cells).filter(([k,v])=>k.startsWith('|w|')&&v.sayma).length;const we=document.getElementById('cnt-walkin');if(we)we.textContent=wc;document.getElementById('totBadge').textContent=`Randevu: ${Object.entries(cells).filter(([,v])=>v.sayma).length}`;}
 
 // PAGE
-window.showPage=function(pg){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+pg).classList.add('active');document.getElementById('btnDash').style.display=pg==='dashboard'?'none':'';document.getElementById('btnPano').style.display=pg==='dashboard'?'':'none';if(pg==='dashboard'){document.getElementById('dashDate').value=curDate;renderDash();}}
+window.showPage=function(pg){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+pg).classList.add('active');
+  document.getElementById('btnDash').style.display=pg==='dashboard'?'none':'';
+  document.getElementById('btnRapor').style.display=pg==='rapor'?'none':'';
+  document.getElementById('btnPano').style.display=(pg==='dashboard'||pg==='rapor')?'':'none';
+  if(pg==='dashboard'){document.getElementById('dashDate').value=curDate;renderDash();}
+  if(pg==='rapor'){renderRapor();}
+}
 
 // DASHBOARD
 window.renderDash=function(){const dt=document.getElementById('dashDate').value||curDate;api(`/data?date=${dt}`).then(r=>r.json()).then(d=>_dash(d.cells||{})).catch(()=>_dash(cells));}
@@ -634,109 +666,114 @@ window.changePwd=async function(){
 }
 
 // EVENTS
-[['raporOverlay','closeRapor'],['advOverlay','closeAdvPanel'],['cellOverlay','closeCellM'],['settOverlay','closeSett'],['editOverlay','closeEdit']].forEach(([id,fn])=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this)window[fn]();});});
+[['advOverlay','closeAdvPanel'],['cellOverlay','closeCellM'],['settOverlay','closeSett'],['editOverlay','closeEdit']].forEach(([id,fn])=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this)window[fn]();});});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.moverlay.open').forEach(m=>m.classList.remove('open'));if(document.getElementById('tvOverlay').style.display!=='none')closeTV();}if(e.key==='F11'&&document.getElementById('tvOverlay').style.display!=='none'){e.preventDefault();if(!document.fullscreenElement)document.getElementById('tvOverlay').requestFullscreen();else document.exitFullscreen();}});
 document.getElementById('plakInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const b=document.querySelector('#sOpts .sbtn');if(b)b.click();}});
 document.getElementById('editN').addEventListener('keydown',e=>{if(e.key==='Enter')saveEdit();});
 ['luser','lpass'].forEach(id=>{document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});});
 
 
+
 // ── RAPOR ────────────────────────────────────────────
-window.openRapor = function() {
-  document.getElementById('raporTip').value = 'hafta';
-  document.getElementById('ozelAralik').style.display = 'none';
-  renderRapor();
-  document.getElementById('raporOverlay').classList.add('open');
+window.onRaporTipChange = function() {
+  const tip = document.getElementById('raporTip').value;
+  document.getElementById('ozelAralik').style.display = tip==='ozel' ? 'flex' : 'none';
+  if(tip !== 'ozel') renderRapor();
 }
-window.closeRapor = function() { document.getElementById('raporOverlay').classList.remove('open'); }
 
-document.getElementById('raporTip').addEventListener('change', function() {
-  document.getElementById('ozelAralik').style.display = this.value === 'ozel' ? 'flex' : 'none';
-  if(this.value !== 'ozel') renderRapor();
-});
-
-function getDateRange(tip) {
+function getDateRange() {
+  const tip = document.getElementById('raporTip').value;
   const now = new Date();
   let bas, bit;
-  if(tip === 'hafta') {
-    const day = now.getDay() || 7;
-    bas = new Date(now); bas.setDate(now.getDate() - day + 1);
-    bit = new Date(now); bit.setDate(now.getDate() - day + 7);
-  } else if(tip === 'ay') {
-    bas = new Date(now.getFullYear(), now.getMonth(), 1);
-    bit = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  if(tip==='hafta') {
+    const day = now.getDay()||7;
+    bas = new Date(now); bas.setDate(now.getDate()-day+1);
+    bit = new Date(now);
+  } else if(tip==='ay') {
+    bas = new Date(now.getFullYear(),now.getMonth(),1);
+    bit = new Date(now);
   } else {
-    const b = document.getElementById('raporBas').value;
-    const bt = document.getElementById('raporBit').value;
-    if(!b || !bt) return null;
-    bas = new Date(b); bit = new Date(bt);
+    const b=document.getElementById('raporBas').value;
+    const bt=document.getElementById('raporBit').value;
+    if(!b||!bt) return [];
+    bas=new Date(b); bit=new Date(bt);
   }
-  const dates = [];
-  const cur = new Date(bas);
-  while(cur <= bit) {
-    dates.push(cur.toISOString().slice(0,10));
-    cur.setDate(cur.getDate() + 1);
-  }
+  const dates=[];
+  const cur=new Date(bas);
+  while(cur<=bit) { dates.push(cur.toISOString().slice(0,10)); cur.setDate(cur.getDate()+1); }
   return dates;
 }
 
-async function renderRapor() {
-  const tip = document.getElementById('raporTip').value;
-  const dates = getDateRange(tip);
-  if(!dates) return;
+window.renderRapor = async function() {
+  const dates = getDateRange();
+  if(!dates.length) return;
+  document.getElementById('raporYukleniyor').style.display='block';
+  document.getElementById('raporOzet').innerHTML='';
+  document.getElementById('raporTablo').innerHTML='';
+  document.getElementById('gunlukDagilim').innerHTML='';
+  document.getElementById('plakaUyari').innerHTML='';
 
-  // Tüm günlerin verisini çek
+  // Tüm günlerin verisini çek (lokal önce, worker sonra)
   const allCells = {};
   await Promise.all(dates.map(async date => {
     try {
+      // Önce local storage'dan dene
+      const local = localStorage.getItem('localDay_'+date);
+      if(local) { allCells[date] = JSON.parse(local); return; }
       const r = await api(`/data?date=${date}`);
+      if(!r.ok) { allCells[date]={}; return; }
       const d = await r.json();
-      allCells[date] = d.cells || {};
-    } catch(e) { allCells[date] = {}; }
+      allCells[date] = d.cells||{};
+    } catch(e) { allCells[date]={}; }
   }));
 
-  // Toplu istatistik
-  let totR=0, totM=0, totX=0, totGec=0, totD=0;
-  const advStats = advisors.map((_,ai) => ({r:0,m:0,x:0,gec:0,d:0,plakalar:[],gelmeyen:[]}));
-  const plakaGelmedi = {}; // plaka -> kac kez gelmedi
+  document.getElementById('raporYukleniyor').style.display='none';
+
+  // İstatistik topla
+  let totR=0,totM=0,totX=0,totGec=0,totD=0;
+  const advStats = advisors.map(()=>({r:0,m:0,x:0,gec:0,d:0,gelmeyen:[]}));
+  const plakaGelmedi = {};
+  const gunluk = {}; // date -> {r, x}
 
   dates.forEach(date => {
-    const dc = allCells[date] || {};
-    Object.entries(dc).forEach(([key, val]) => {
+    const dc = allCells[date]||{};
+    gunluk[date] = {r:0, x:0};
+    Object.entries(dc).forEach(([key,val]) => {
       const parts = key.split('|');
       const ai = parseInt(parts[1]);
-      const isAdv = !isNaN(ai) && ai >= 0 && ai < advisors.length;
-      if(val.code==='R'){ totR++; if(isAdv){ advStats[ai].r++; if(val.plaka)advStats[ai].plakalar.push(val.plaka); } }
+      const isAdv = !isNaN(ai) && ai>=0 && ai<advisors.length;
+      if(val.code==='R'){ totR++; gunluk[date].r++; if(isAdv)advStats[ai].r++; }
       if(val.code==='M'){ totM++; if(isAdv)advStats[ai].m++; }
-      if(val.code==='X'){ totX++; if(isAdv){ advStats[ai].x++; if(val.plaka){ advStats[ai].gelmeyen.push(val.plaka); plakaGelmedi[val.plaka]=(plakaGelmedi[val.plaka]||0)+1; } } }
+      if(val.code==='X'){ totX++; gunluk[date].x++; if(isAdv){ advStats[ai].x++; if(val.plaka){advStats[ai].gelmeyen.push(val.plaka);plakaGelmedi[val.plaka]=(plakaGelmedi[val.plaka]||0)+1;} } }
       if(val.code==='!!'){ totGec++; if(isAdv)advStats[ai].gec++; }
       if(val.code==='D'){ totD++; if(isAdv)advStats[ai].d++; }
     });
   });
 
-  // Özet kartlar
-  const oz = document.getElementById('raporOzet');
-  oz.innerHTML = `
-    <div class="rapor-kart" style="border-top-color:#16a085;"><div class="rn" style="color:#16a085;">${totR}</div><div class="rl">Toplam Geldi (R)</div></div>
-    <div class="rapor-kart" style="border-top-color:#27ae60;"><div class="rn" style="color:#27ae60;">${totM}</div><div class="rl">Toplam Görüşme (M)</div></div>
-    <div class="rapor-kart" style="border-top-color:#7f8c8d;"><div class="rn" style="color:#7f8c8d;">${totX}</div><div class="rl">Gelmedi (X)</div></div>
-    <div class="rapor-kart" style="border-top-color:#c0392b;"><div class="rn" style="color:#c0392b;">${totGec}</div><div class="rl">Geçgeç (!!)</div></div>
-    <div class="rapor-kart" style="border-top-color:#d35400;"><div class="rn" style="color:#d35400;">${totD}</div><div class="rl">DRP8 (D)</div></div>
-    <div class="rapor-kart" style="border-top-color:#2980b9;"><div class="rn" style="color:#2980b9;">${dates.length}</div><div class="rl">İş Günü</div></div>
+  // Ozet kartlar
+  document.getElementById('raporOzet').innerHTML=`
+    <div class="rapor-kart" style="border-top-color:#16a085;"><div class="rn" style="color:#16a085;">${totR}</div><div class="rl">Toplam Geldi</div></div>
+    <div class="rapor-kart" style="border-top-color:#27ae60;"><div class="rn" style="color:#27ae60;">${totM}</div><div class="rl">Toplam Gorusme</div></div>
+    <div class="rapor-kart" style="border-top-color:#7f8c8d;"><div class="rn" style="color:#7f8c8d;">${totX}</div><div class="rl">Gelmedi</div></div>
+    <div class="rapor-kart" style="border-top-color:#c0392b;"><div class="rn" style="color:#c0392b;">${totGec}</div><div class="rl">Geccgec</div></div>
+    <div class="rapor-kart" style="border-top-color:#d35400;"><div class="rn" style="color:#d35400;">${totD}</div><div class="rl">DRP8</div></div>
+    <div class="rapor-kart" style="border-top-color:#2980b9;"><div class="rn" style="color:#2980b9;">${dates.length}</div><div class="rl">Gun</div></div>
+    <div class="rapor-kart" style="border-top-color:#8e44ad;"><div class="rn" style="color:#8e44ad;">${totR>0?Math.round((totX/(totR+totX))*100):0}%</div><div class="rl">Gelmeme Orani</div></div>
   `;
 
   // Danışman tablosu
-  const tablo = document.getElementById('raporTablo');
-  let html = `<thead><tr class="rtablo">
-    <th>Danışman</th><th>Geldi (R)</th><th>Görüşme (M)</th><th>Gelmedi (X)</th><th>Geçgeç (!!)</th><th>DRP8 (D)</th><th>Gelmeme %</th>
+  let html=`<thead><tr>
+    <th>Danisман</th><th style="color:#b8e0d0;">Geldi (R)</th><th style="color:#b8e0d0;">Gorusme (M)</th>
+    <th style="color:#ccc;">Gelmedi (X)</th><th style="color:#ffaaaa;">Geccgec (!!)</th>
+    <th style="color:#ffc999;">DRP8 (D)</th><th>Gelmeme %</th>
   </tr></thead><tbody>`;
-  advisors.forEach((name, ai) => {
-    const s = advStats[ai];
-    const toplam = s.r + s.x;
-    const oran = toplam > 0 ? Math.round((s.x / toplam) * 100) : 0;
-    const oranRenk = oran >= 30 ? '#c0392b' : oran >= 15 ? '#e67e22' : '#27ae60';
-    html += `<tr>
-      <td style="text-align:left;font-weight:600;color:#1a3a5c;">${name}</td>
+  advisors.forEach((name,ai)=>{
+    const s=advStats[ai];
+    const toplam=s.r+s.x;
+    const oran=toplam>0?Math.round((s.x/toplam)*100):0;
+    const oranRenk=oran>=30?'#c0392b':oran>=15?'#e67e22':'#27ae60';
+    html+=`<tr>
+      <td>${name}</td>
       <td style="color:#16a085;font-weight:700;">${s.r}</td>
       <td style="color:#27ae60;font-weight:700;">${s.m}</td>
       <td style="color:#7f8c8d;font-weight:700;">${s.x}</td>
@@ -745,21 +782,40 @@ async function renderRapor() {
       <td style="color:${oranRenk};font-weight:700;">%${oran}</td>
     </tr>`;
   });
-  html += '</tbody>';
-  tablo.innerHTML = html;
-  tablo.className = 'rtablo';
+  html+='</tbody>';
+  document.getElementById('raporTablo').innerHTML=html;
+  document.getElementById('raporTablo').className='rtablo';
+
+  // Gunluk dagilim bar grafik
+  const maxR = Math.max(...Object.values(gunluk).map(g=>g.r), 1);
+  let gunHtml = '';
+  dates.forEach(date => {
+    const g = gunluk[date];
+    const [y,m,d] = date.split('-');
+    const label = `${d}.${m}`;
+    const barW = Math.max(Math.round((g.r/maxR)*200), g.r>0?8:2);
+    const barXW = Math.max(Math.round((g.x/maxR)*200), g.x>0?8:2);
+    gunHtml += `<div class="gun-bar">
+      <div class="gn">${label}</div>
+      ${g.r>0?`<div class="gb" style="width:${barW}px;"><div class="gv">${g.r} geldi</div></div>`:''}
+      ${g.x>0?`<div class="gx" style="width:${barXW}px;"><div class="gv">${g.x} gel.</div></div>`:''}
+      ${g.r===0&&g.x===0?`<div style="font-size:11px;color:#ccc;">Kayit yok</div>`:''}
+    </div>`;
+  });
+  document.getElementById('gunlukDagilim').innerHTML = gunHtml || '<div style="color:#aaa;font-size:12px;">Veri yok</div>';
 
   // Tekrar gelmeyen plakalar
+  const tekrarlar = Object.entries(plakaGelmedi).filter(([,v])=>v>=2).sort((a,b)=>b[1]-a[1]);
   const uyari = document.getElementById('plakaUyari');
-  const tekrarlar = Object.entries(plakaGelmedi).filter(([,v]) => v >= 2).sort((a,b) => b[1]-a[1]);
-  if(tekrarlar.length === 0) {
-    uyari.innerHTML = '<span style="font-size:12px;color:#888;">Tekrar gelmeyen plaka yok.</span>';
+  if(!tekrarlar.length) {
+    uyari.innerHTML='<span style="font-size:12px;color:#888;">Tekrar gelmeyen plaka yok.</span>';
   } else {
-    uyari.innerHTML = tekrarlar.map(([plaka, sayi]) =>
+    uyari.innerHTML = tekrarlar.map(([plaka,sayi])=>
       `<div class="puyari">${plaka}<span>${sayi}x gelmedi</span></div>`
     ).join('');
   }
 }
+
 
 // ── OTOMATİK DURUM DEĞİŞİMİ ──────────────────────────
 // Her dakika kontrol: saati geçmiş R hücreleri -> !! yap
