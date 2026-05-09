@@ -232,7 +232,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);}
 <!-- GİRİŞ -->
 <div id="loginScreen">
   <div class="lbox">
-    <div style="font-size:48px;font-weight:700;color:#1a3a5c;">RP</div>
+    
     <h2>Randevu Planlama</h2>
     <div class="sub">Devam etmek için giriş yapın</div>
     <div class="lerr" id="lerr"></div>
@@ -537,12 +537,10 @@ function buildTable(){
   advisors.forEach((nm,ai)=>{
     const th=document.createElement('th');th.className='hadv';
     const ph=photos[ai];const av=ph?`<img src="${ph}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;margin:0 auto 3px;display:block;border:2px solid #fff;">`:`<div class="avc">${gi(nm)}</div>`;
-    th.innerHTML=`<div class="avc" id="avEl-\${ai}">\${ph?`<img src="\${ph}">`:\`<span>\${gi(nm)}</span>\`}</div><div style="font-size:10px;margin-bottom:2px;">\${nm}</div><div class="cbadge" id="cnt-\${ai}">0</div><div class="hint">Toplu islem</div>`;
+    th.innerHTML='<div class="avc" id="avEl-'+ai+'">' + (ph ? '<img src="'+ph+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;margin:0 auto 3px;display:block;border:2px solid #fff;">' : '<span>'+gi(nm)+'</span>') + '</div><div style="font-size:10px;margin-bottom:2px;">'+nm+'</div><div class="cbadge" id="cnt-'+ai+'">0</div><div class="hint">Toplu islem</div>';
     th.addEventListener('click',()=>openAdvPanel(ai));tr.appendChild(th);
   });
-  const thW=document.createElement('th');thW.className='hwal';thW.innerHTML=`<div class="hadv-av" style="background:rgba(255,255,255,.1);">?</div>
-      <div class="hadv-name">Randevusuz Gelen</div>
-      <div class="hadv-cnt" id="cnt-walkin">0</div>`;tr.appendChild(thW);head.appendChild(tr);
+  const thW=document.createElement('th');thW.className='hwal';thW.innerHTML='<div class="avc w" style="font-size:16px;">?</div><div style="font-size:10px;margin-bottom:3px;">Randevusuz<br>Gelen</div><div class="cbadge" id="cnt-walkin">0</div>';tr.appendChild(thW);head.appendChild(tr);
   TM.forEach(t=>{
     const ih=t.endsWith(':00'),row=document.createElement('tr');
     const td0=document.createElement('td');td0.className='tcol'+(ih?' h':'');td0.textContent=t;row.appendChild(td0);
