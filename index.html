@@ -625,20 +625,37 @@ TM.forEach(t=>{const ih=t.endsWith(':00'),key=`|${ai}|${t}`,st=cells[key],s=ST.f
 
 // ŞİFRE DEĞİŞTİR
 window.changePwd=async function(){
-  const o=document.getElementById('oldPwd').value,n1=document.getElementById('newPwd').value,n2=document.getElementById('newPwd2').value;
+  const o=document.getElementById('oldPwd').value.trim();
+  const n1=document.getElementById('newPwd').value.trim();
+  const n2=document.getElementById('newPwd2').value.trim();
   const msg=document.getElementById('pwdMsg');
-  if(!o||!n1||!n2){msg.style.color='#e74c3c';msg.textContent='Tüm alanları doldurun.';return;}
-  if(n1!==n2){msg.style.color='#e74c3c';msg.textContent='Yeni şifreler eşleşmiyor.';return;}
-  if(n1.length<4){msg.style.color='#e74c3c';msg.textContent='En az 4 karakter.';return;}
-  try{const r=await api('/change-password',{method:'POST',body:JSON.stringify({oldPassword:o,newPassword:n1})});const d=await r.json();if(!r.ok){msg.style.color='#e74c3c';msg.textContent=d.error||'Hata';return;}msg.style.color='#27ae60';msg.textContent='V Şifreniz güncellendi!';document.getElementById('oldPwd').value='';document.getElementById('newPwd').value='';document.getElementById('newPwd2').value='';}catch(e){msg.style.color='#e74c3c';msg.textContent='Bağlantı hatası.';}
+  msg.textContent=''; msg.style.display='block';
+  if(!o||!n1||!n2){msg.style.color='#e74c3c';msg.textContent='Tüm alanlari doldurun.';return;}
+  if(n1!==n2){msg.style.color='#e74c3c';msg.textContent='Yeni sifreler eslesmiyor.';return;}
+  if(n1.length<4){msg.style.color='#e74c3c';msg.textContent='En az 4 karakter olmali.';return;}
+  msg.style.color='#888';msg.textContent='Guncelleniyor...';
+  try{
+    const r=await fetch(`${W}/change-password`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Token':token},
+      body:JSON.stringify({oldPassword:o,newPassword:n1})
+    });
+    const d=await r.json();
+    if(!r.ok){msg.style.color='#e74c3c';msg.textContent=d.error||'Hata olustu';return;}
+    msg.style.color='#27ae60';
+    msg.textContent='Sifreniz basariyla guncellendi!';
+    document.getElementById('oldPwd').value='';
+    document.getElementById('newPwd').value='';
+    document.getElementById('newPwd2').value='';
+  }catch(e){
+    msg.style.color='#e74c3c';
+    msg.textContent='Baglanti hatasi: '+e.message;
+  }
 }
 
 // EVENTS
 [['raporOverlay','closeRapor'],['advOverlay','closeAdvPanel'],['cellOverlay','closeCellM'],['settOverlay','closeSett'],['editOverlay','closeEdit']].forEach(([id,fn])=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this)window[fn]();});});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.moverlay.open').forEach(m=>m.classList.remove('open'));if(document.getElementById('tvOverlay').style.display!=='none')closeTV();}if(e.key==='F11'&&document.getElementById('tvOverlay').style.display!=='none'){e.preventDefault();if(!document.fullscreenElement)document.getElementById('tvOverlay').requestFullscreen();else document.exitFullscreen();}});
-document.getElementById('plakInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const b=document.querySelector('#sOpts .sbtn');if(b)b.click();}});
-document.getElementById('editN').addEventListener('keydown',e=>{if(e.key==='Enter')saveEdit();});
-['luser','lpass'].forEach(id=>{document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});});
 
 
 // ── RAPOR ────────────────────────────────────────────
@@ -854,6 +871,33 @@ async function kontrolPlakaGecmis(plaka) {
 
 // BOOT
 try{restore();}catch(e){}
+
+// ENTER TUSU - TUM ALANLAR
+(function(){
+  function ae(id,fn){var el=document.getElementById(id);if(el)el.addEventListener('keydown',function(e){if(e.key==='Enter')fn();});}
+  ae('luser',doLogin);
+  ae('lpass',doLogin);
+  ae('oldPwd',changePwd);
+  ae('newPwd',changePwd);
+  ae('newPwd2',changePwd);
+  ae('editN',saveEdit);
+  ae('newAdvN',addAdv);
+  var plakEl=document.getElementById('plakInput');
+  if(plakEl)plakEl.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){var b=document.querySelector('#sOpts .sbtn');if(b)b.click();}
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){
+      document.querySelectorAll('.moverlay.open').forEach(function(m){m.classList.remove('open');});
+      var tv=document.getElementById('tvOverlay');
+      if(tv&&tv.style.display!=='none')closeTV();
+    }
+    if(e.key==='F11'){
+      var tv=document.getElementById('tvOverlay');
+      if(tv&&tv.style.display!=='none'){e.preventDefault();if(!document.fullscreenElement)tv.requestFullscreen();else document.exitFullscreen();}
+    }
+  });
+})();
 </script>
 </body>
 </html>
